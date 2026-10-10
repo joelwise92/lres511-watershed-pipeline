@@ -1,0 +1,104 @@
+"layer","source_attribute","keep","harmonized_name","source_units","units","multiply_by","nodata_source","description"
+"watershed_boundary","id","FALSE",,,,,,
+"watershed_boundary","objectid","FALSE",,,,,,
+"watershed_boundary","tnmid","FALSE",,,,,,
+"watershed_boundary","metasourceid","FALSE",,,,,,
+"watershed_boundary","sourcedatadesc","FALSE",,,,,,
+"watershed_boundary","sourceoriginator","FALSE",,,,,,
+"watershed_boundary","sourcefeatureid","FALSE",,,,,,
+"watershed_boundary","loaddate","TRUE","wbd_load_date","date-time","date",,,"Date the WBD record was loaded; used as dataset version"
+"watershed_boundary","referencegnis_ids","FALSE",,,,,,
+"watershed_boundary","areaacres","FALSE",,,,,,
+"watershed_boundary","areasqkm","TRUE","area_km2","km2","km2",,,"Watershed area as reported by the WBD"
+"watershed_boundary","states","TRUE","states",,,,,"State(s) the watershed falls in"
+"watershed_boundary","huc12","TRUE","huc12",,,,,"12-digit hydrologic unit code of the watershed"
+"watershed_boundary","name","TRUE","watershed_name",,,,,"Watershed name from the WBD"
+"watershed_boundary","hutype","FALSE",,,,,,
+"watershed_boundary","humod","FALSE",,,,,,
+"watershed_boundary","tohuc","TRUE","downstream_huc12",,,,,"HUC12 code of the next watershed downstream"
+"watershed_boundary","noncontributingareaacres","FALSE",,,,,,
+"watershed_boundary","noncontributingareasqkm","FALSE",,,,,,
+"watershed_boundary","globalid","FALSE",,,,,,
+"streams","permanent_identifier","FALSE",,,,,,
+"streams","fdate","TRUE","feature_date","milliseconds since 1970-01-01","date",,,"Date the flowline feature was last modified"
+"streams","resolution","FALSE",,,,,,
+"streams","gnis_id","FALSE",,,,,,
+"streams","gnis_name","TRUE","stream_name",,,,,"Official stream name (NA for unnamed reaches)"
+"streams","lengthkm","TRUE","length_km","km","km",,,"Flowline length"
+"streams","reachcode","TRUE","reach_code",,,,,"14-digit NHD reach code"
+"streams","flowdir","FALSE",,,,,,
+"streams","wbarea_permanent_identifier","FALSE",,,,,,
+"streams","ftype","FALSE",,,,,,
+"streams","fcode","TRUE","feature_code",,,,,"NHD feature code (46003 intermittent, 46006 perennial, 46007 ephemeral, 55800 artificial path through a waterbody)"
+"streams","mainpath","FALSE",,,,,,
+"streams","innetwork","FALSE",,,,,,
+"streams","visibilityfilter","FALSE",,,,,,
+"streams","nhdplusid","TRUE","nhdplus_id",,,,,"Unique NHDPlus HR flowline identifier"
+"streams","vpuid","FALSE",,,,,,
+"streams","streamleve","FALSE",,,,,,
+"streams","streamorde","TRUE","stream_order",,,,,"Strahler stream order"
+"streams","streamcalc","FALSE",,,,,,
+"streams","fromnode","FALSE",,,,,,
+"streams","tonode","FALSE",,,,,,
+"streams","hydroseq","TRUE","hydro_seq",,,,,"Hydrologic sequence number; orders flowlines from downstream to upstream"
+"streams","levelpathi","FALSE",,,,,,
+"streams","pathlength","FALSE",,,,,,
+"streams","terminalpa","FALSE",,,,,,
+"streams","arbolatesu","FALSE",,,,,,
+"streams","divergence","FALSE",,,,,,
+"streams","startflag","FALSE",,,,,,
+"streams","terminalfl","FALSE",,,,,,
+"streams","uplevelpat","FALSE",,,,,,
+"streams","uphydroseq","FALSE",,,,,,
+"streams","dnlevel","FALSE",,,,,,
+"streams","dnlevelpat","FALSE",,,,,,
+"streams","dnhydroseq","TRUE","downstream_hydro_seq",,,,,"Hydrologic sequence number of the next flowline downstream; links the network"
+"streams","dnminorhyd","FALSE",,,,,,
+"streams","dndraincou","FALSE",,,,,,
+"streams","frommeas","FALSE",,,,,,
+"streams","tomeas","FALSE",,,,,,
+"streams","rtndiv","FALSE",,,,,,
+"streams","thinner","FALSE",,,,,,
+"streams","vpuin","FALSE",,,,,,
+"streams","vpuout","FALSE",,,,,,
+"streams","areasqkm","FALSE",,,,,,
+"streams","totdasqkm","TRUE","drainage_area_km2","km2","km2",,,"Total upstream drainage area at the downstream end of the flowline"
+"streams","divdasqkm","FALSE",,,,,,
+"streams","maxelevraw","FALSE",,,,,,
+"streams","minelevraw","FALSE",,,,,,
+"streams","maxelevsmo","TRUE","elev_max_m","cm","m","0.01","-9998","Smoothed maximum elevation of the flowline"
+"streams","minelevsmo","TRUE","elev_min_m","cm","m","0.01","-9998","Smoothed minimum elevation of the flowline"
+"streams","slope","TRUE","slope_m_per_m","m/m","m/m",,"-9998","Smoothed flowline slope"
+"streams","slopelenkm","FALSE",,,,,,
+"streams","elevfixed","FALSE",,,,,,
+"streams","hwtype","FALSE",,,,,,
+"streams","hwnodesqkm","FALSE",,,,,,
+"streams","statusflag","FALSE",,,,,,
+"streams","qama","FALSE",,,,,,
+"streams","vama","FALSE",,,,,,
+"streams","qincrama","FALSE",,,,,,
+"streams","qbma","FALSE",,,,,,
+"streams","vbma","FALSE",,,,,,
+"streams","qincrbma","FALSE",,,,,,
+"streams","qcma","FALSE",,,,,,
+"streams","vcma","FALSE",,,,,,
+"streams","qincrcma","FALSE",,,,,,
+"streams","qdma","FALSE",,,,,,
+"streams","vdma","FALSE",,,,,,
+"streams","qincrdma","FALSE",,,,,,
+"streams","qema","FALSE",,,,,,
+"streams","vema","FALSE",,,,,,
+"streams","qincrema","FALSE",,,,,,
+"streams","qfma","FALSE",,,,,,
+"streams","qincrfma","FALSE",,,,,,
+"streams","arqnavma","FALSE",,,,,,
+"streams","petma","FALSE",,,,,,
+"streams","qlossma","FALSE",,,,,,
+"streams","qgadjma","FALSE",,,,,,
+"streams","qgnavma","FALSE",,,,,,
+"streams","gageadjma","FALSE",,,,,,
+"streams","avgqadjma","FALSE",,,,,,
+"streams","gageidma","FALSE",,,,,,
+"streams","gageqma","FALSE",,,,,,
+"streams","Shape_Length","FALSE",,,,,,
+"dem","elevation (band 1)","TRUE","elevation_m","m","m",,"-9999","Elevation from USGS 3DEP 1/3 arc-second DEM, resampled to the common grid"

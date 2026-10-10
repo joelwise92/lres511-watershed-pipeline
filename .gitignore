@@ -1,0 +1,18 @@
+# Raw and intermediate data are rebuilt by the pipeline
+1_input/*
+!1_input/.gitkeep
+!1_input/retrieval_log.csv
+!1_input/source_metadata/
+3_incremental/*
+!3_incremental/.gitkeep
+4_product/data/
+
+# R and RStudio
+.Rproj.user/
+.Rhistory
+.RData
+renv/library/
+.Rproj.user
+.httr-oauth
+.DS_Store
+.quarto

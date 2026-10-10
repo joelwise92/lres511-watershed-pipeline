@@ -1,0 +1,116 @@
+---
+title: "Harmonized geospatial data summary"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  echo: false
+  warning: false
+---
+
+```{r setup}
+# Run code from the project root so targets can find its data store
+knitr::opts_knit$set(root.dir = "..")
+```
+
+```{r load}
+library(targets)
+config     <- tar_read(config)
+ws         <- sf::st_read(tar_read(watershed_final), quiet = TRUE)
+streams    <- sf::st_read(tar_read(streams_final), quiet = TRUE)
+dem        <- terra::rast(tar_read(dem_harmonized))
+catalog    <- read.csv(tar_read(layer_catalog))
+dictionary <- read.csv(tar_read(data_dictionary))
+```
+
+## Study area
+
+```{r study-area, results = "asis"}
+cat(paste0(
+  "**Watershed:** ", ws$watershed_name, " (HUC12 ", ws$huc12, ")  \n",
+  "**Area:** ", round(ws$area_km2, 1), " km²  \n",
+  "**Output CRS:** EPSG:", config$crs, "  \n",
+  "**Grid resolution:** ", config$resolution_m, " m"
+))
+```
+
+## Maps
+
+```{r map-dem, fig.cap = "Harmonized DEM with stream network (blue) and watershed boundary (red)."}
+terra::plot(dem, main = "Elevation (m)")
+terra::lines(terra::vect(streams), col = "blue")
+terra::lines(terra::vect(ws), col = "red", lwd = 2)
+```
+
+```{r map-order, fig.cap = "Stream network by Strahler stream order."}
+plot(sf::st_geometry(ws), border = "grey40", main = "Stream order")
+plot(streams["stream_order"], add = TRUE, lwd = streams$stream_order)
+```
+
+## Quality checks
+
+```{r qa}
+res <- config$resolution_m
+
+# Share of DEM cells inside the watershed that are missing
+inside  <- terra::rasterize(terra::vect(ws), dem)
+dem_in  <- terra::mask(dem, inside)
+n_in    <- terra::global(inside, "notNA")[[1]]
+n_na_in <- n_in - terra::global(dem_in, "notNA")[[1]]
+
+dem_rng <- as.numeric(terra::global(dem, c("min", "max"), na.rm = TRUE))
+str_rng <- range(c(streams$elev_min_m, streams$elev_max_m), na.rm = TRUE)
+
+checks <- data.frame(
+  check = c(
+    "All layers use the output CRS",
+    "DEM cell size matches config",
+    "DEM grid snapped to cell size",
+    "No missing DEM cells inside watershed",
+    "DEM elevations in plausible range (500 to 4500 m)",
+    "All streams fall within the watershed",
+    "Stream elevations within 50 m of DEM range"
+  ),
+  result = c(
+    paste(unique(c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
+                   terra::crs(dem, describe = TRUE)$code)), collapse = ", "),
+    paste(terra::res(dem), collapse = " x "),
+    paste("xmin", terra::xmin(dem), "/ ymin", terra::ymin(dem)),
+    paste0(n_na_in, " of ", n_in, " cells"),
+    paste(round(dem_rng, 1), collapse = " to "),
+    paste(sum(lengths(sf::st_within(streams, sf::st_buffer(ws, 1)))), "of", nrow(streams)),
+    paste0("streams ", paste(round(str_rng, 1), collapse = " to "),
+           "; DEM ", paste(round(dem_rng, 1), collapse = " to "))
+  ),
+  pass = c(
+    all(c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
+          as.numeric(terra::crs(dem, describe = TRUE)$code)) == config$crs),
+    all(terra::res(dem) == res),
+    terra::xmin(dem) %% res == 0 && terra::ymin(dem) %% res == 0,
+    n_na_in == 0,
+    dem_rng[1] > 500 && dem_rng[2] < 4500,
+    all(lengths(sf::st_within(streams, sf::st_buffer(ws, 1))) > 0),
+    str_rng[1] > dem_rng[1] - 50 && str_rng[2] < dem_rng[2] + 50
+  )
+)
+checks$pass <- ifelse(checks$pass, "PASS", "CHECK")
+knitr::kable(checks, col.names = c("Check", "Result", "Status"))
+```
+
+Checks marked CHECK are not necessarily errors; see the decision log for known differences (for example, stream attributes describe whole flowlines, not the clipped segments).
+
+## Layer catalog
+
+```{r catalog}
+knitr::kable(catalog[, c("layer", "source", "version", "retrieved",
+                         "native_crs", "output_crs", "output_resolution", "processing")])
+```
+
+## Data dictionary
+
+```{r dictionary}
+knitr::kable(dictionary[, c("variable", "layer", "units", "data_type",
+                            "range", "n_missing", "processing")])
+```
