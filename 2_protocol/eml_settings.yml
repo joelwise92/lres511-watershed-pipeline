@@ -1,0 +1,48 @@
+# Settings for the EML metadata (4_product/eml.xml).
+# Everything else in the metadata comes from the pipeline's own files.
+
+title: "Harmonized public geospatial data for steep-terrain watershed research"
+
+abstract: >
+  Terrain, stream network, soil erodibility, rainfall intensity, forest canopy, and
+  disturbance history layers for one watershed, assembled from public sources (USGS
+  3DEP and NHDPlus HR, the Watershed Boundary Dataset, NRCS SSURGO, NOAA Atlas 14,
+  and LANDFIRE canopy cover, canopy height, and Annual Disturbance) by a
+  reproducible R pipeline.
+  All layers share one coordinate reference system and grid, attributes are harmonized
+  through a documented crosswalk, and every processing decision is recorded in the
+  project's decision log.
+
+creator:
+  given_name: "Joel"
+  sur_name: "Wise"
+  organization: "Montana State University"
+  email: "joel.wise@student.montana.edu"
+
+keywords:
+  - watershed
+  - digital elevation model
+  - stream network
+  - soil erodibility
+  - precipitation frequency
+  - forest canopy
+  - disturbance history
+  - wildfire
+  - data harmonization
+  - reproducible research
+
+intellectual_rights: >
+  This dataset is released under the Creative Commons Attribution 4.0 International
+  License (CC BY 4.0). Source data are public domain U.S. government products from USGS,
+  NRCS, NOAA, and the LANDFIRE program.
+
+methods_overview: >
+  Each layer is downloaded by script, saved unchanged with its source metadata, and
+  logged with its source, version, and retrieval date. Layers are then reprojected to
+  a common coordinate reference system, resampled to a common grid, masked to the
+  watershed, and harmonized to consistent attribute names, units, and NoData values
+  using a documented crosswalk. Raw downloads (where logged) and final files carry MD5
+  checksums, and revisions are logged in 2_protocol/changelog.csv. Automated quality
+  checks are reported in the rendered summary report. The steps below describe each
+  layer.
+  

@@ -1,0 +1,36 @@
+Point precipitation frequency estimates (millimeters/hour)
+NOAA Atlas 14 Volume 10 Version 3
+Data type: Precipitation intensity
+Time series type: Partial duration
+Project area: Northeastern States
+Location name (ESRI Maps): None
+Station Name: None
+Latitude: 41.13833 Degree
+Longitude: -74.10766 Degree
+Elevation (USGS): None None
+
+
+PRECIPITATION FREQUENCY ESTIMATES
+by duration for ARI (years):, 1,2,5,10,25,50,100,200,500,1000
+5-min:, 114,134,168,195,234,263,293,324,368,403
+10-min:, 80,95,119,138,166,186,207,230,261,285
+15-min:, 63,74,93,109,130,146,163,180,205,224
+30-min:, 43,51,64,74,89,100,111,123,140,153
+60-min:, 28,33,41,47,56,63,71,78,89,97
+2-hr:, 19,22,26,31,36,40,45,49,56,61
+3-hr:, 14,17,21,24,28,31,35,38,44,48
+6-hr:, 9,11,13,16,19,21,23,26,30,33
+12-hr:, 5,7,8,10,12,14,16,18,20,23
+24-hr:, 3,4,5,6,8,9,10,11,13,14
+2-day:, 2,2,3,3,4,5,5,6,7,8
+3-day:, 1,2,2,2,3,3,4,4,5,6
+4-day:, 1,1,2,2,2,3,3,3,4,5
+7-day:, 1,1,1,1,2,2,2,2,3,3
+10-day:, 1,1,1,1,1,1,1,2,2,2
+20-day:, 0,0,1,1,1,1,1,1,1,1
+30-day:, 0,0,0,1,1,1,1,1,1,1
+45-day:, 0,0,0,0,0,1,1,1,1,1
+60-day:, 0,0,0,0,0,0,0,0,1,1
+
+Date/time (GMT):  Sun Nov  1 03:38:18 2026
+pyRunTime:  0.013158798217773438

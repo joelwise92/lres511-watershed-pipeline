@@ -2,7 +2,7 @@
 
 study_area:
   name: "pilot"            # short label used in file names
-  huc12: "100301030801"    # replace with the pilot watershed's 12-digit HUC12 ID
+  huc12: "031601130302"    # replace with the pilot watershed's 12-digit HUC12 ID
 
 crs: 5070                  # EPSG code for all outputs (draft; see decision log)
 resolution_m: 10           # target grid cell size in meters (draft; see decision log)
@@ -10,3 +10,17 @@ resolution_m: 10           # target grid cell size in meters (draft; see decisio
 dates:
   start: "2000-01-01"      # earliest date for time-dependent layers
   end: "2025-12-31"        # latest date for time-dependent layers
+
+precip:
+  volume_prefix: "auto"           # "auto" looks up the Atlas 14 volume; or set a folder code
+  ari_years: 2                    # return period in years
+  durations: ["30m", "60m", "06h"]
+
+forest:
+  email: "joel.wise@student.montana.edu"   # required by LANDFIRE for each request
+  products: ["LF2024_CC", "LF2024_CH"]
+
+disturbance:
+  start_year: 1999
+  end_year: 2025
+  tables_url: "https://landfire.gov/sites/default/files/CSV/AllYears/DistCSV_AllYears.zip?release=R5"

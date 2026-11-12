@@ -1,0 +1,3 @@
+revision,date,scope,change
+1,10/21/2026,entire dataset,"First release: watershed, DEM, streams, soils, precipitation, LANDFIRE forest structure, and LANDFIRE disturbance summaries on the common grid."
+2,10/21/2026,disturbance layers and metadata,"dist_last_severity: Moderate labels now rank 2 (they were unranked, so older severities showed through) and code 0 marks disturbances without a severity class; added the disturbance code lookup file; data dictionary says derived from for raster values; crosswalk and EML settings updated for the LANDFIRE layers."

@@ -1,0 +1,954 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eml:eml xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.2" packageId="huc12-031601130302-harmonized.2" system="local" xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://eml.ecoinformatics.org/eml-2.2.0/eml.xsd">
+  <dataset>
+    <title>Harmonized public geospatial data for steep-terrain watershed research: Elliotts Creek (HUC12 031601130302)</title>
+    <creator>
+      <individualName>
+        <givenName>Joel</givenName>
+        <surName>Wise</surName>
+      </individualName>
+      <organizationName>Montana State University</organizationName>
+      <electronicMailAddress>joel.wise@student.montana.edu</electronicMailAddress>
+    </creator>
+    <pubDate>2026-10-31</pubDate>
+    <abstract>
+      <para>Terrain, stream network, soil erodibility, rainfall intensity, forest canopy, and disturbance history layers for one watershed, assembled from public sources (USGS 3DEP and NHDPlus HR, the Watershed Boundary Dataset, NRCS SSURGO, NOAA Atlas 14, and LANDFIRE canopy cover, canopy height, and Annual Disturbance) by a reproducible R pipeline. All layers share one coordinate reference system and grid, attributes are harmonized through a documented crosswalk, and every processing decision is recorded in the project's decision log.
+</para>
+    </abstract>
+    <keywordSet>
+      <keyword>watershed</keyword>
+      <keyword>digital elevation model</keyword>
+      <keyword>stream network</keyword>
+      <keyword>soil erodibility</keyword>
+      <keyword>precipitation frequency</keyword>
+      <keyword>forest canopy</keyword>
+      <keyword>disturbance history</keyword>
+      <keyword>wildfire</keyword>
+      <keyword>data harmonization</keyword>
+      <keyword>reproducible research</keyword>
+    </keywordSet>
+    <intellectualRights>
+      <para>This dataset is released under the Creative Commons Attribution 4.0 International License (CC BY 4.0). Source data are public domain U.S. government products from USGS, NRCS, NOAA, and the LANDFIRE program.
+</para>
+    </intellectualRights>
+    <coverage>
+      <geographicCoverage>
+        <geographicDescription>Elliotts Creek watershed (HUC12 031601130302), AL</geographicDescription>
+        <boundingCoordinates>
+          <westBoundingCoordinate>-87.71041</westBoundingCoordinate>
+          <eastBoundingCoordinate>-87.42576</eastBoundingCoordinate>
+          <northBoundingCoordinate>33.01102</northBoundingCoordinate>
+          <southBoundingCoordinate>32.92572</southBoundingCoordinate>
+        </boundingCoordinates>
+      </geographicCoverage>
+    </coverage>
+    <maintenance>
+      <description>
+        <para>Revision 2. The dataset is rebuilt by rerunning the pipeline; each revision is logged in 2_protocol/changelog.csv with its date and what changed.</para>
+      </description>
+      <changeHistory>
+        <changeScope>entire dataset</changeScope>
+        <oldValue>none (first release)</oldValue>
+        <changeDate>2026-10-21</changeDate>
+        <comment>Revision 1: First release: watershed, DEM, streams, soils, precipitation, LANDFIRE forest structure, and LANDFIRE disturbance summaries on the common grid.</comment>
+      </changeHistory>
+      <changeHistory>
+        <changeScope>disturbance layers and metadata</changeScope>
+        <oldValue>revision 1</oldValue>
+        <changeDate>2026-10-21</changeDate>
+        <comment>Revision 2: dist_last_severity: Moderate labels now rank 2 (they were unranked, so older severities showed through) and code 0 marks disturbances without a severity class; added the disturbance code lookup file; data dictionary says derived from for raster values; crosswalk and EML settings updated for the LANDFIRE layers.</comment>
+      </changeHistory>
+    </maintenance>
+    <contact>
+      <individualName>
+        <givenName>Joel</givenName>
+        <surName>Wise</surName>
+      </individualName>
+      <organizationName>Montana State University</organizationName>
+      <electronicMailAddress>joel.wise@student.montana.edu</electronicMailAddress>
+    </contact>
+    <methods>
+      <methodStep>
+        <description>
+          <para>Each layer is downloaded by script, saved unchanged with its source metadata, and logged with its source, version, and retrieval date. Layers are then reprojected to a common coordinate reference system, resampled to a common grid, masked to the watershed, and harmonized to consistent attribute names, units, and NoData values using a documented crosswalk. Raw downloads (where logged) and final files carry MD5 checksums, and revisions are logged in 2_protocol/changelog.csv. Automated quality checks are reported in the rendered summary report. The steps below describe each layer.
+ Pipeline code version: not under git version control.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>watershed_boundary: USGS Watershed Boundary Dataset via nhdplusTools::get_huc() (https://www.usgs.gov/national-hydrography/watershed-boundary-dataset). Version: WBD record load date 2024-08-15; nhdplusTools 1.5.2. Retrieved: 2026-10-31 21:45:38 MDT. Raw file MD5: f10e51d9a2dbac57256f801dd00b7f00. Processing: Reprojected to output CRS; attributes renamed and converted per crosswalk. Scripts: get_watershed.R; harmonize_grid.R (harmonize_watershed); harmonize_attributes.R.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>dem: USGS 3DEP 1/3 arc-second seamless DEM (current), read via GDAL /vsicurl/ (https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n33w088/USGS_13_n33w088.tif; https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n34w088/USGS_13_n34w088.tif). Version: 3DEP current tiles: n33w088, n34w088; source dates 20151210 to 20240327 (range across all source projects in the tiles; see dem_tiles_031601130302.csv); vertical datum North American Vertical Datum of 1988; cropped to watershed + 1000 m buffer. Retrieved: 2026-10-31 21:47:31 MDT. Raw file MD5: b51a4a506243d31eca4e768561b0ef24. Processing: Reprojected and resampled (bilinear) to common grid; masked to watershed; no pit or flat filling; elevations keep the source vertical datum (see version); NoData = -9999. Scripts: get_dem.R; harmonize_grid.R (harmonize_dem).</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>streams: USGS NHDPlus HR network flowlines via nhdplusTools::get_nhdphr(), queried in tiles (https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer). Version: 241 flowlines from 4 tiles; nhdplusTools 1.5.2. Retrieved: 2026-10-31 21:47:48 MDT. Raw file MD5: 5a1c2333d270572d0dde0b0ac90ef798. Processing: Reprojected to output CRS; clipped to watershed; attributes renamed and converted per crosswalk. Scripts: get_streams.R; harmonize_grid.R (harmonize_streams); harmonize_attributes.R.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>soils: NRCS SSURGO via Soil Data Access (soilDB::SDA_spatialQuery, SDA_query) (https://sdmdataaccess.nrcs.usda.gov). Version: Survey AL065, AL125, version date 9/10/2026 1:38:05 PM, 9/10/2026 12:24:14 PM; soilDB 2.9.2. Retrieved: 2026-10-31 21:47:27 MDT. Raw file MD5: 07baa2fee66ae0e8c085b9cb2ea7d13c; bb3a8e44b52ae02a93ac5b150730505c. Processing: Component K from first horizon with a value; map unit K as component-percent weighted mean of components with K (kwfact and kffact separately); percent of map unit without K recorded; polygons rasterized to common grid (cell centers); masked to watershed; NoData = -9999. Scripts: get_soils.R; harmonize_soils.R.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>precip: NOAA Atlas 14 precipitation frequency grids, partial duration series (PFDS) (https://hdsc.nws.noaa.gov/pub/hdsc/data/se/se2yr30ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/se/se2yr60ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/se/se2yr06ha.zip). Version: NOAA Atlas 14 Volume 9 Version 2 (folder se); 2-year ARI; durations 30m, 60m, 06h. Retrieved: 2026-10-31 21:46:46 MDT. Raw file MD5: 21cab1f1e28cd3f4241fd01e7aede0de; 2448f193248496005412fbeacbf9cf45; b67e48965946970ce98f320c17ae5bec; 772dfc0ef040234543771894af254f6d. Processing: Grids read from original zips; NAD83 geographic assigned where the grid has no CRS; cropped to watershed + 2 km; depth (0.001 in) converted to intensity (mm/hr) using crosswalk factors; resampled (bilinear) from ~800 m to common grid; masked to watershed; NoData = -9999. Scripts: get_precip.R; harmonize_precip.R.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>forest: LANDFIRE Product Service v2 via rlandfire::landfireAPIv2() (https://lfps.usgs.gov). Version: LF2024_CC, LF2024_CH; rlandfire 2.0.2. Retrieved: 2026-10-31 21:45:48 MDT. Raw file MD5: 83d223e7e43065fb3cd388d5a2859240. Processing: LANDFIRE products requested in output CRS; canopy height converted from decimeters to meters; resampled from 30 m to common grid with nearest neighbor (classed values); masked to watershed; NoData = -9999. Scripts: get_forest.R; harmonize_forest.R.</para>
+        </description>
+      </methodStep>
+      <methodStep>
+        <description>
+          <para>disturbance: LANDFIRE Annual Disturbance (final) via rlandfire::landfireAPIv2(); attribute tables from landfire.gov (https://lfps.usgs.gov; https://landfire.gov/sites/default/files/CSV/AllYears/DistCSV_AllYears.zip?release=R5). Version: 1999-2025; products LF2001_Dist99, LF2001_Dist00, LF2001_Dist01, LF2001_Dist02, LF2001_Dist03, LF2001_Dist04, LF2001_Dist05, LF2001_Dist06, LF2001_Dist07, LF2008_Dist08, LF2010_Dist09, LF2010_Dist10, LF2012_Dist11, LF2012_Dist12, LF2014_Dist13, LF2014_Dist14, LF2016_Dist15, LF2016_Dist16, LF2020_Dist17, LF2020_Dist18, LF2020_Dist19, LF2020_Dist20, LF2022_Dist21, LF2022_Dist22, LF2023_Dist23, LF2024_Dist24, LF2025_Dist25; attribute tables dated 20250127, 20250727, 20250129, 20241022, 20241023, 20230426, 20241212, 20241219, 20260213; rlandfire 2.0.2. Retrieved: 2026-10-31 21:46:43 MDT. Raw file MD5: 2941994bac8fca44adc12f15c62d9408; a294486739ad5ba7d05e6efc660921b8; 79903708e3ebd79d84cd37b28fb699d5; c2324be9de20cada4137fde1edbc880d. Processing: Annual codes translated with each year's own LANDFIRE attribute table; LANDFIRE DIST_TYPE values grouped into harvest, fire, insect, and other per 2_protocol/dist_type_groups.csv; LANDFIRE SEVERITY labels ranked 1 (low or unburned), 2 (medium or moderate), 3 (high) by their first word, and 0 when the label is not a severity class (e.g. No Severity). Summarized per cell at 30 m: each group keeps its own most recent year, so a cell with insect mortality that later burned has both an insect year and a fire year; dist_last_severity is the severity of the most recent disturbance of any group; dist_count is the number of years with any disturbance. Every source label with its assigned group and rank is listed in the watershed's 4_product/data/disturbance_codes_[HUC12].csv. Resampled to common grid with nearest neighbor; masked to watershed; NoData = -9999. Scripts: get_disturbance.R; harmonize_disturbance.R.</para>
+        </description>
+      </methodStep>
+    </methods>
+    <otherEntity>
+      <entityName>watershed_031601130302.gpkg</entityName>
+      <entityDescription>Vector layer 'watershed_boundary' for HUC12 031601130302; EPSG:5070</entityDescription>
+      <physical>
+        <objectName>watershed_031601130302.gpkg</objectName>
+        <size unit="bytes">122880</size>
+        <authentication method="MD5">136e4bc187a0d161f2ca00d95ac3bd82</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoPackage</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>wbd_load_date</attributeName>
+          <attributeDefinition>Date the WBD record was loaded; used as dataset version</attributeDefinition>
+          <storageType>date</storageType>
+          <measurementScale>
+            <dateTime>
+              <formatString>YYYY-MM-DD</formatString>
+              <dateTimeDomain/>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>area_km2</attributeName>
+          <attributeDefinition>Watershed area as reported by the WBD</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>squareKilometer</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>states</attributeName>
+          <attributeDefinition>State(s) the watershed falls in</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>State(s) the watershed falls in</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>huc12</attributeName>
+          <attributeDefinition>12-digit hydrologic unit code of the watershed</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>12-digit hydrologic unit code of the watershed</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>watershed_name</attributeName>
+          <attributeDefinition>Watershed name from the WBD</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>Watershed name from the WBD</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>downstream_huc12</attributeName>
+          <attributeDefinition>HUC12 code of the next watershed downstream</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>HUC12 code of the next watershed downstream</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+      </attributeList>
+      <entityType>GeoPackage</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>streams_031601130302.gpkg</entityName>
+      <entityDescription>Vector layer 'streams' for HUC12 031601130302; EPSG:5070</entityDescription>
+      <physical>
+        <objectName>streams_031601130302.gpkg</objectName>
+        <size unit="bytes">348160</size>
+        <authentication method="MD5">7ae12371cd3a38fffb0d889bcce07826</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoPackage</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>feature_date</attributeName>
+          <attributeDefinition>Date the flowline feature was last modified</attributeDefinition>
+          <storageType>date</storageType>
+          <measurementScale>
+            <dateTime>
+              <formatString>YYYY-MM-DD</formatString>
+              <dateTimeDomain/>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>stream_name</attributeName>
+          <attributeDefinition>Official stream name (NA for unnamed reaches)</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>Official stream name (NA for unnamed reaches)</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>length_km</attributeName>
+          <attributeDefinition>Flowline length</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>kilometer</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>reach_code</attributeName>
+          <attributeDefinition>14-digit NHD reach code</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>14-digit NHD reach code</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>feature_code</attributeName>
+          <attributeDefinition>NHD feature code (46003 intermittent, 46006 perennial, 46007 ephemeral, 55800 artificial path through a waterbody)</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>NHD feature code (46003 intermittent, 46006 perennial, 46007 ephemeral, 55800 artificial path through a waterbody)</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>nhdplus_id</attributeName>
+          <attributeDefinition>Unique NHDPlus HR flowline identifier</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>Unique NHDPlus HR flowline identifier</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>stream_order</attributeName>
+          <attributeDefinition>Strahler stream order</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>dimensionless</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>integer</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>hydro_seq</attributeName>
+          <attributeDefinition>Hydrologic sequence number; orders flowlines from downstream to upstream</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>Hydrologic sequence number; orders flowlines from downstream to upstream</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>downstream_hydro_seq</attributeName>
+          <attributeDefinition>Hydrologic sequence number of the next flowline downstream; links the network</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>Hydrologic sequence number of the next flowline downstream; links the network</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>drainage_area_km2</attributeName>
+          <attributeDefinition>Total upstream drainage area at the downstream end of the flowline</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>squareKilometer</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>elev_max_m</attributeName>
+          <attributeDefinition>Smoothed maximum elevation of the flowline</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>meter</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>elev_min_m</attributeName>
+          <attributeDefinition>Smoothed minimum elevation of the flowline</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>meter</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>slope_m_per_m</attributeName>
+          <attributeDefinition>Smoothed flowline slope</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>meterPerMeter</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+      </attributeList>
+      <entityType>GeoPackage</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dem_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dem' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dem_031601130302_10m.tif</objectName>
+        <size unit="bytes">6271696</size>
+        <authentication method="MD5">8d0d2dd4658901b45899d0b5c3fa728f</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>elevation_m</attributeName>
+          <attributeDefinition>Elevation from USGS 3DEP 1/3 arc-second DEM, resampled to the common grid</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>meter</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>soil_kw_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'soil_kw' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>soil_kw_031601130302_10m.tif</objectName>
+        <size unit="bytes">1161224</size>
+        <authentication method="MD5">6a864369acccf97064e23fd043b8ab5b</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>soil_kw</attributeName>
+          <attributeDefinition>Whole-soil erodibility (includes rock fragments); component-percent weighted mean of first horizon with a value</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>kFactorUSCustomary</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>soil_kf_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'soil_kf' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>soil_kf_031601130302_10m.tif</objectName>
+        <size unit="bytes">1155440</size>
+        <authentication method="MD5">a2aadcdcf116f54bfb090f3d6861fe76</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>soil_kf</attributeName>
+          <attributeDefinition>Fine-earth erodibility (excludes rock fragments); component-percent weighted mean of first horizon with a value</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>kFactorUSCustomary</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>soil_pct_no_k_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'soil_pct_no_k' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>soil_pct_no_k_031601130302_10m.tif</objectName>
+        <size unit="bytes">114998</size>
+        <authentication method="MD5">7f0e52a20a78582d4d9783d11b34a411</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>soil_pct_no_k</attributeName>
+          <attributeDefinition>Percent of the map unit made up of components with no K-factor (rock outcrop, rubble land, pits, water)</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>percent</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>precip_2yr_30m_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'precip_2yr_30m' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>precip_2yr_30m_031601130302_10m.tif</objectName>
+        <size unit="bytes">3988292</size>
+        <authentication method="MD5">bdc7b01f4123d3dda1aa97556712a047</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>precip_2yr_30m</attributeName>
+          <attributeDefinition>2-year 30-minute rainfall intensity, partial duration series, NOAA Atlas 14 Volume 12</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>millimeterPerHour</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>precip_2yr_60m_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'precip_2yr_60m' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>precip_2yr_60m_031601130302_10m.tif</objectName>
+        <size unit="bytes">4129644</size>
+        <authentication method="MD5">91f249f8704230fb3963008ce57d2a18</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>precip_2yr_60m</attributeName>
+          <attributeDefinition>2-year 1-hour rainfall intensity, partial duration series, NOAA Atlas 14 Volume 12</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>millimeterPerHour</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>precip_2yr_06h_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'precip_2yr_06h' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>precip_2yr_06h_031601130302_10m.tif</objectName>
+        <size unit="bytes">4038570</size>
+        <authentication method="MD5">008f1069652e9870c228fcaf4be45fa7</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>precip_2yr_06h</attributeName>
+          <attributeDefinition>2-year 6-hour rainfall intensity, partial duration series, NOAA Atlas 14 Volume 12</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <customUnit>millimeterPerHour</customUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>forest_cc_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'forest_cc' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>forest_cc_031601130302_10m.tif</objectName>
+        <size unit="bytes">1795112</size>
+        <authentication method="MD5">9261471aace608c905ed989da123a715</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>forest_cc</attributeName>
+          <attributeDefinition>Forest canopy cover, LANDFIRE 2024; classed values (0, 15, 25, ... 75), each representing a cover range</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>percent</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>forest_ch_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'forest_ch' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>forest_ch_031601130302_10m.tif</objectName>
+        <size unit="bytes">1751829</size>
+        <authentication method="MD5">0a946e3e6af53524eca775ed46c25447</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>forest_ch</attributeName>
+          <attributeDefinition>Forest canopy height, LANDFIRE 2024; classed values (0, 3, 7, 11, ... 39 m), each representing a height range</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>meter</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dist_last_harvest_year_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dist_last_harvest_year' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dist_last_harvest_year_031601130302_10m.tif</objectName>
+        <size unit="bytes">48028</size>
+        <authentication method="MD5">427d4751435aee714438d2ef0c2b26ac</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>dist_last_harvest_year</attributeName>
+          <attributeDefinition>Most recent year with harvest, clearcut, or thinning (LANDFIRE Annual Disturbance)</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>nominalYear</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dist_last_fire_year_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dist_last_fire_year' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dist_last_fire_year_031601130302_10m.tif</objectName>
+        <size unit="bytes">79578</size>
+        <authentication method="MD5">f565d5a69bb00fa2d567e2fac33e9cbf</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>dist_last_fire_year</attributeName>
+          <attributeDefinition>Most recent year with wildfire or prescribed fire (LANDFIRE Annual Disturbance)</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>nominalYear</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dist_last_insect_year_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dist_last_insect_year' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dist_last_insect_year_031601130302_10m.tif</objectName>
+        <size unit="bytes">42917</size>
+        <authentication method="MD5">c557fb68fda4e080c396a1018ea127ff</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>dist_last_insect_year</attributeName>
+          <attributeDefinition>Most recent year with insects or disease (LANDFIRE Annual Disturbance)</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>nominalYear</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dist_count_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dist_count' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dist_count_031601130302_10m.tif</objectName>
+        <size unit="bytes">159450</size>
+        <authentication method="MD5">9e2d3c893dffdcb4b93a05e863950f3c</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>dist_count</attributeName>
+          <attributeDefinition>Number of years with any disturbance in the requested year range</attributeDefinition>
+          <storageType>float</storageType>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>dimensionless</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+    <otherEntity>
+      <entityName>dist_last_severity_031601130302_10m.tif</entityName>
+      <entityDescription>Raster layer 'dist_last_severity' for HUC12 031601130302; EPSG:5070; 10 m grid</entityDescription>
+      <physical>
+        <objectName>dist_last_severity_031601130302_10m.tif</objectName>
+        <size unit="bytes">161463</size>
+        <authentication method="MD5">f2f7dbe40853c40dbe13bacfad1909ca</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>GeoTIFF (cloud-optimized)</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>dist_last_severity</attributeName>
+          <attributeDefinition>Severity class of the most recent disturbance: 0 no severity class, 1 low, 2 medium or moderate, 3 high (LANDFIRE Annual Disturbance SEVERITY)</attributeDefinition>
+          <storageType>string</storageType>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>0</code>
+                    <definition>No severity class: disturbed, but the LANDFIRE SEVERITY label is not a severity class (e.g. No Severity, Increased Green, blank)</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>Low: LANDFIRE SEVERITY label beginning with Low or Unburned (e.g. Low, Low-Medium, Unburned/Low)</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>Medium: LANDFIRE SEVERITY label beginning with Medium or Moderate (e.g. Medium, Medium-High, Moderate, Moderate-Low, Moderate-High)</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>High: LANDFIRE SEVERITY label beginning with High</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+          <missingValueCode>
+            <code>-9999</code>
+            <codeExplanation>NoData: cell outside the watershed boundary or no source value</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+      <entityType>GeoTIFF (cloud-optimized)</entityType>
+    </otherEntity>
+  </dataset>
+  <additionalMetadata>
+    <metadata>
+      <unitList>
+        <unit id="squareKilometer" multiplierToSI="1000000" name="squareKilometer" parentSI="squareMeter" unitType="area">
+          <description>square kilometer</description>
+        </unit>
+        <unit id="meterPerMeter" multiplierToSI="1" name="meterPerMeter" parentSI="dimensionless" unitType="dimensionless">
+          <description>meters of elevation change per meter of distance</description>
+        </unit>
+        <unit id="millimeterPerHour" multiplierToSI="0.0000002777778" name="millimeterPerHour" parentSI="metersPerSecond" unitType="speed">
+          <description>millimeters per hour</description>
+        </unit>
+        <unit id="percent" multiplierToSI="0.01" name="percent" parentSI="dimensionless" unitType="dimensionless">
+          <description>percent</description>
+        </unit>
+        <unit id="kFactorUSCustomary" multiplierToSI="1" name="kFactorUSCustomary" parentSI="dimensionless" unitType="dimensionless">
+          <description>soil erodibility K-factor in US customary units (ton acre hour per hundred acre foot ton-force inch); listed as dimensionless only for EML unit typing</description>
+        </unit>
+      </unitList>
+    </metadata>
+  </additionalMetadata>
+</eml:eml>

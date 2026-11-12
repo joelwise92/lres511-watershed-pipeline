@@ -21,8 +21,28 @@ config     <- tar_read(config)
 ws         <- sf::st_read(tar_read(watershed_final), quiet = TRUE)
 streams    <- sf::st_read(tar_read(streams_final), quiet = TRUE)
 dem        <- terra::rast(tar_read(dem_harmonized))
+soils      <- terra::rast(tar_read(soils_harmonized)[1:3])
+mapunits   <- read.csv(tar_read(soils_harmonized)[4])
+precip     <- terra::rast(tar_read(precip_harmonized))
+precip_raw <- tar_read(precip_files)   # raw zips; the PFDS point table is saved alongside
+forest     <- terra::rast(tar_read(forest_harmonized))
+dist       <- terra::rast(tar_read(dist_harmonized)[1:5])   # 6th file is the code lookup
+dist_codes <- read.csv(tar_read(dist_harmonized)[6])
 catalog    <- read.csv(tar_read(layer_catalog))
 dictionary <- read.csv(tar_read(data_dictionary))
+
+# Color palettes: one per kind of variable
+pal_elev <- hcl.colors(50, "Terrain")
+pal_k    <- hcl.colors(50, "YlOrBr", rev = TRUE)
+pal_pct  <- hcl.colors(50, "Grays", rev = TRUE)
+pal_prec <- hcl.colors(50, "Blues", rev = TRUE)
+pal_for  <- hcl.colors(12, "Greens", rev = TRUE)
+pal_year <- hcl.colors(12, "YlOrRd", rev = TRUE)   # later years darker
+pal_cnt  <- hcl.colors(8, "Purples", rev = TRUE)
+pal_sev  <- c("grey75", "khaki", "orange", "red3")  # 0 none, 1 low, 2 medium, 3 high
+
+# Shared scale for both K maps, so equal colors mean equal values
+k_range <- range(as.vector(terra::global(soils[[1:2]], c("min", "max"), na.rm = TRUE)))
 ```
 
 ## Study area
@@ -36,17 +56,95 @@ cat(paste0(
 ))
 ```
 
-## Maps
+## Terrain and streams
 
 ```{r map-dem, fig.cap = "Harmonized DEM with stream network (blue) and watershed boundary (red)."}
-terra::plot(dem, main = "Elevation (m)")
+terra::plot(dem, col = pal_elev, main = "Elevation (m)")
 terra::lines(terra::vect(streams), col = "blue")
 terra::lines(terra::vect(ws), col = "red", lwd = 2)
 ```
 
-```{r map-order, fig.cap = "Stream network by Strahler stream order."}
+```{r map-order, fig.cap = "Stream network by Strahler stream order. Darker and thicker lines are higher-order (larger) streams."}
+ord  <- sort(unique(streams$stream_order))
+cols <- hcl.colors(length(ord) + 1, "Blues 3", rev = TRUE)[-1]   # skip the palest blue
 plot(sf::st_geometry(ws), border = "grey40", main = "Stream order")
-plot(streams["stream_order"], add = TRUE, lwd = streams$stream_order)
+plot(sf::st_geometry(streams), add = TRUE,
+     col = cols[match(streams$stream_order, ord)],
+     lwd = 0.5 + streams$stream_order)
+legend("bottomleft", legend = ord, col = cols, lwd = 0.5 + ord,
+       title = "Strahler order", bty = "n")
+```
+
+## Soils
+
+K-factors are aggregated from SSURGO components and horizons (see the decision log). Both K maps share one color scale. Soil values are uniform within each map unit polygon, so their real spatial detail is the polygon, not the 10 m grid.
+
+```{r map-kw, fig.cap = "Whole-soil K-factor (kwfact), which accounts for rock fragments."}
+terra::plot(soils[["soil_kw"]], range = k_range, col = pal_k,
+            main = "K whole soil (kwfact)")
+```
+
+```{r map-kf, fig.cap = "Fine-earth K-factor (kffact), which excludes rock fragments. Same color scale as the whole-soil map."}
+terra::plot(soils[["soil_kf"]], range = k_range, col = pal_k,
+            main = "K fine earth (kffact)")
+```
+
+```{r map-nok, fig.cap = "Percent of each map unit made up of components without a K-factor (rock outcrop, rubble land, pits, water)."}
+terra::plot(soils[["soil_pct_no_k"]], col = pal_pct,
+            main = "Percent of map unit without K (rock, rubble)")
+```
+
+## Precipitation
+
+Rainfall intensity for the `r config$precip$ari_years`-year storm from NOAA Atlas 14 Volume 12 (partial duration series), converted from depth to intensity and resampled from about 800 m to the 10 m grid. Each map has its own color scale; intensity varies only a few percent across the watershed, so the smooth gradients show a small range.
+
+```{r map-precip, fig.cap = "Rainfall intensity (mm/hr) by storm duration."}
+for (i in seq_len(terra::nlyr(precip))) {
+  terra::plot(precip[[i]], col = pal_prec,
+              main = paste0(names(precip)[i], " (mm/hr)"))
+}
+```
+
+## Forest structure
+
+Canopy cover and canopy height from LANDFIRE 2024, resampled from 30 m to the 10 m grid with nearest neighbor. LANDFIRE stores both as classes, so each map shows a small set of values, each representing a range.
+
+```{r map-forest-cc, fig.cap = "Forest canopy cover (%), LANDFIRE 2024 classes."}
+terra::plot(forest[["forest_cc"]], col = pal_for, main = "Canopy cover (%)")
+```
+
+```{r map-forest-ch, fig.cap = "Forest canopy height (m), LANDFIRE 2024 classes."}
+terra::plot(forest[["forest_ch"]], col = pal_for, main = "Canopy height (m)")
+```
+
+## Disturbance history
+
+LANDFIRE Annual Disturbance, `r config$disturbance$start_year` to `r config$disturbance$end_year`. Each year's codes are translated with that year's LANDFIRE attribute table and grouped by type (`2_protocol/dist_type_groups.csv`). Year maps show the most recent year of each disturbance group; blank areas had no disturbance of that group. LANDFIRE may under-record insect mortality, which develops gradually; see the decision log. LANDFIRE's own disturbance type and severity labels, with the group and severity class assigned to each, are listed in 4_product/data/disturbance_codes_`r config$study_area$huc12`.csv.
+
+```{r map-dist-years, fig.cap = "Most recent year of harvest, fire, and insect or disease disturbance."}
+for (nm in c("dist_last_harvest_year", "dist_last_fire_year", "dist_last_insect_year")) {
+  if (all(is.na(terra::global(dist[[nm]], "max", na.rm = TRUE)))) {
+    terra::plot(terra::vect(ws), main = paste(nm, "(none recorded)"))
+  } else {
+    terra::plot(dist[[nm]], col = pal_year, main = nm)
+    terra::lines(terra::vect(ws), col = "grey40")
+  }
+}
+```
+
+```{r map-dist-count, fig.cap = "Number of years with any recorded disturbance."}
+terra::plot(dist[["dist_count"]], col = pal_cnt, main = "Years with any disturbance")
+```
+
+```{r map-dist-sev, fig.cap = "Severity class of the most recent disturbance (0 no severity class, 1 low, 2 medium or moderate, 3 high)."}
+# Fixed value-to-color table, so each class keeps its color even when some
+# classes are absent from the watershed
+sev <- dist[["dist_last_severity"]]
+levels(sev) <- data.frame(value = 0:3,
+                          severity = c("None", "Low", "Moderate", "High"))
+terra::coltab(sev) <- data.frame(value = 0:3, col = pal_sev)
+terra::plot(sev, main = "Severity of most recent disturbance")
+terra::lines(terra::vect(ws), col = "grey40")
 ```
 
 ## Quality checks
@@ -56,50 +154,154 @@ res <- config$resolution_m
 
 # Share of DEM cells inside the watershed that are missing
 inside  <- terra::rasterize(terra::vect(ws), dem)
-dem_in  <- terra::mask(dem, inside)
 n_in    <- terra::global(inside, "notNA")[[1]]
-n_na_in <- n_in - terra::global(dem_in, "notNA")[[1]]
+n_na_in <- n_in - terra::global(terra::mask(dem, inside), "notNA")[[1]]
+
+# Soil coverage inside the watershed
+kw_in     <- terra::mask(soils[["soil_kw"]], inside)
+pct_in    <- terra::mask(soils[["soil_pct_no_k"]], inside)
+# no map unit, or a map unit with no components: a real gap in the soil data
+n_nodata  <- n_in - terra::global(pct_in, "notNA")[[1]]
+# K missing even though the map unit has some soil: should never happen
+n_k_gap   <- terra::global(is.na(kw_in) & pct_in < 100, "sum", na.rm = TRUE)[[1]]
+# map units that are entirely rock, rubble, pits, or water: describes the landscape
+n_nonsoil <- terra::global(pct_in == 100, "sum", na.rm = TRUE)[[1]]
 
 dem_rng <- as.numeric(terra::global(dem, c("min", "max"), na.rm = TRUE))
 str_rng <- range(c(streams$elev_min_m, streams$elev_max_m), na.rm = TRUE)
+k_rng   <- range(as.vector(terra::global(soils[[1:2]], c("min", "max"), na.rm = TRUE)))
+
+crs_codes <- c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
+               as.numeric(terra::crs(dem, describe = TRUE)$code),
+               as.numeric(terra::crs(soils, describe = TRUE)$code),
+               as.numeric(terra::crs(precip, describe = TRUE)$code),
+               as.numeric(terra::crs(forest, describe = TRUE)$code),
+               as.numeric(terra::crs(dist, describe = TRUE)$code))
+
+# Disturbance: years within the requested range, counts and severity plausible
+yr_cfg   <- c(config$disturbance$start_year, config$disturbance$end_year)
+yr_layers <- c("dist_last_harvest_year", "dist_last_fire_year", "dist_last_insect_year")
+yr_rng   <- range(unlist(lapply(yr_layers, function(nm)
+              as.numeric(terra::global(dist[[nm]], c("min", "max"), na.rm = TRUE)))), na.rm = TRUE)
+cnt_max  <- terra::global(dist[["dist_count"]], "max", na.rm = TRUE)[[1]]
+n_years  <- diff(yr_cfg) + 1
+sev_vals <- sort(unique(stats::na.omit(terra::values(dist[["dist_last_severity"]]))))
+# Disturbance types not in dist_type_groups.csv (counted as "other")
+unmapped <- sort(unique(dist_codes$dist_type[!dist_codes$in_groups_file]))
+
+# Forest: classed values survive resampling only if no blending happened
+n_classes <- vapply(names(forest), function(nm)
+  length(unique(stats::na.omit(terra::values(forest[[nm]])))), integer(1))
+
+# Precipitation: compare the watershed-center value with NOAA's point table
+pf_lines <- readLines(file.path("1_input", "source_metadata", "precip",
+                                paste0("pfds_point_intensity_", config$study_area$huc12, ".txt")))
+ari_cols <- trimws(strsplit(sub("^.*:,", "", grep("^by duration", pf_lines, value = TRUE)), ",")[[1]])
+col_i    <- match(as.character(config$precip$ari_years), ari_cols)
+dur_lab  <- c("30m" = "30-min", "60m" = "60-min", "06h" = "6-hr")
+noaa_pt  <- vapply(unlist(config$precip$durations), function(d) {
+  line <- grep(paste0("^", dur_lab[[d]], ":"), pf_lines, value = TRUE)
+  as.numeric(trimws(strsplit(sub("^.*:,", "", line), ",")[[1]])[col_i])
+}, numeric(1))
+ctr      <- terra::vect(sf::st_centroid(sf::st_geometry(ws)))
+grid_pt  <- as.numeric(terra::extract(precip, ctr)[1, -1])
+pt_diff  <- abs(grid_pt - noaa_pt)
+
+# Shorter storms should be more intense than longer ones in every cell
+p_order  <- all(vapply(seq_len(terra::nlyr(precip) - 1), function(i) {
+  d <- terra::global(precip[[i]] - precip[[i + 1]], "min", na.rm = TRUE)[[1]]
+  d > 0
+}, logical(1)))
 
 checks <- data.frame(
   check = c(
     "All layers use the output CRS",
     "DEM cell size matches config",
     "DEM grid snapped to cell size",
+    "Soil rasters on the same grid as the DEM",
     "No missing DEM cells inside watershed",
-    "DEM elevations in plausible range (500 to 4500 m)",
+    "DEM elevations within the range of the lower 48 states (-100 to 4500 m)",
     "All streams fall within the watershed",
-    "Stream elevations within 50 m of DEM range"
+    "Stream elevations within 50 m of DEM range",
+    "K-factors in SSURGO range (0.02 to 0.69)",
+    "No cells inside the watershed without soil data",
+    "Whole-soil K missing only where the map unit is entirely rock, rubble, pits, or water",
+    "Share of watershed that is entirely rock, rubble, pits, or water (information)",
+    "Precipitation rasters on the same grid as the DEM",
+    "Precipitation at watershed center within 1 mm/hr of NOAA point table",
+    "Shorter storms more intense than longer storms in every cell",
+    "Forest rasters on the same grid as the DEM",
+    "Forest values are LANDFIRE classes, not blended (20 or fewer distinct values per layer)",
+    "Disturbance rasters on the same grid as the DEM",
+    "Disturbance years within the requested range",
+    "Disturbance count no greater than the number of years requested",
+    "Disturbance severity values are 0, 1, 2, or 3",
+    "All LANDFIRE disturbance types are in dist_type_groups.csv"
   ),
   result = c(
-    paste(unique(c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
-                   terra::crs(dem, describe = TRUE)$code)), collapse = ", "),
+    paste(unique(crs_codes), collapse = ", "),
     paste(terra::res(dem), collapse = " x "),
     paste("xmin", terra::xmin(dem), "/ ymin", terra::ymin(dem)),
+    as.character(terra::compareGeom(dem, soils, stopOnError = FALSE)),
     paste0(n_na_in, " of ", n_in, " cells"),
     paste(round(dem_rng, 1), collapse = " to "),
-    paste(sum(lengths(sf::st_within(streams, sf::st_buffer(ws, 1)))), "of", nrow(streams)),
+    paste(sum(lengths(sf::st_within(streams, sf::st_buffer(ws, 1))) > 0), "of", nrow(streams)),
     paste0("streams ", paste(round(str_rng, 1), collapse = " to "),
-           "; DEM ", paste(round(dem_rng, 1), collapse = " to "))
+           "; DEM ", paste(round(dem_rng, 1), collapse = " to ")),
+    paste(round(k_rng, 3), collapse = " to "),
+    paste0(n_nodata, " of ", n_in, " cells"),
+    paste0(n_k_gap, " cells with missing K in map units that have soil"),
+    paste0(n_nonsoil, " of ", n_in, " cells (", round(100 * n_nonsoil / n_in, 2), "%)"),
+    as.character(terra::compareGeom(dem, precip, stopOnError = FALSE)),
+    paste0("grid ", paste(round(grid_pt, 2), collapse = ", "),
+           "; NOAA ", paste(noaa_pt, collapse = ", "), " (mm/hr)"),
+    as.character(p_order),
+    as.character(terra::compareGeom(dem, forest, stopOnError = FALSE)),
+    paste0(names(n_classes), ": ", n_classes, " values", collapse = "; "),
+    as.character(terra::compareGeom(dem, dist, stopOnError = FALSE)),
+    paste0(paste(yr_rng, collapse = " to "), " (requested ", paste(yr_cfg, collapse = " to "), ")"),
+    paste0("max ", cnt_max, " of ", n_years, " years"),
+    paste(sev_vals, collapse = ", "),
+    if (length(unmapped) == 0) "all mapped" else
+      paste("counted as other:", paste(unmapped, collapse = ", "))
   ),
   pass = c(
-    all(c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
-          as.numeric(terra::crs(dem, describe = TRUE)$code)) == config$crs),
+    all(crs_codes == config$crs),
     all(terra::res(dem) == res),
     terra::xmin(dem) %% res == 0 && terra::ymin(dem) %% res == 0,
+    terra::compareGeom(dem, soils, stopOnError = FALSE),
     n_na_in == 0,
-    dem_rng[1] > 500 && dem_rng[2] < 4500,
+    dem_rng[1] > -100 && dem_rng[2] < 4500,
     all(lengths(sf::st_within(streams, sf::st_buffer(ws, 1))) > 0),
-    str_rng[1] > dem_rng[1] - 50 && str_rng[2] < dem_rng[2] + 50
+    str_rng[1] > dem_rng[1] - 50 && str_rng[2] < dem_rng[2] + 50,
+    k_rng[1] >= 0.02 - 1e-6 && k_rng[2] <= 0.69 + 1e-6,   # tolerance for stored precision
+    n_nodata == 0,
+    n_k_gap == 0,
+    NA,                                                     # information only
+    terra::compareGeom(dem, precip, stopOnError = FALSE),
+    all(pt_diff < 1),
+    p_order,
+    terra::compareGeom(dem, forest, stopOnError = FALSE),
+    all(n_classes <= 20),
+    terra::compareGeom(dem, dist, stopOnError = FALSE),
+    all(is.finite(yr_rng)) && yr_rng[1] >= yr_cfg[1] && yr_rng[2] <= yr_cfg[2],
+    cnt_max <= n_years,
+    all(sev_vals %in% 0:3),
+    length(unmapped) == 0
   )
 )
-checks$pass <- ifelse(checks$pass, "PASS", "CHECK")
+checks$pass <- ifelse(is.na(checks$pass), "INFO", ifelse(checks$pass, "PASS", "CHECK"))
 knitr::kable(checks, col.names = c("Check", "Result", "Status"))
 ```
 
-Checks marked CHECK are not necessarily errors; see the decision log for known differences (for example, stream attributes describe whole flowlines, not the clipped segments).
+Checks marked CHECK are not necessarily errors; see the decision log for known differences (for example, stream attributes describe whole flowlines, not the clipped segments). Rows marked INFO describe the watershed rather than test the data.
+
+## Soil map units
+
+```{r mapunits}
+knitr::kable(mapunits, digits = 3,
+             col.names = c("Map unit key", "K whole soil", "K fine earth", "% without K"))
+```
 
 ## Layer catalog
 

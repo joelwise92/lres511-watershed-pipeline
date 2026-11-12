@@ -1,0 +1,5 @@
+Products: LF2024_CC, LF2024_CH
+AOI (lon/lat): -115.788217888293, 42.5863036043384, -115.513647640324, 42.7972379547059
+Projection requested: EPSG 5070
+Requested: 2026-10-31 18:43:02 MDT
+Files in zip: jd75c45f8fad14fcf8330fb49a546d853.tfw, jd75c45f8fad14fcf8330fb49a546d853.tif, jd75c45f8fad14fcf8330fb49a546d853.tif.aux.xml

@@ -1,0 +1,30 @@
+"dist_type","group","notes"
+"Clearcut","harvest",
+"Harvest","harvest",
+"Thinning","harvest",
+"Wildfire","fire",
+"Wildland Fire","fire",
+"Wildland Fire Use","fire",
+"Prescribed Fire","fire","Grouped with wildfire; change to a separate group if needed"
+"Fire","fire",
+"Insects","insect",
+"Disease","insect",
+"Insects/Disease","insect",
+"Mastication","other",
+"Other Mechanical","other",
+"Mechanical Add","other",
+"Mechanical Remove","other",
+"Mechanical Unknown","other",
+"Weather","other",
+"Insecticide","other",
+"Chemical","other",
+"Herbicide","other",
+"Biological","other",
+"Planting","other",
+"Reforestation","other",
+"Seeding","other",
+"Development","other",
+"Unknown","other",
+"Unknown/Fire Doubtful","other","Cause unknown; fire doubtful"
+"Unknown/Possibly Fire","other","Cause unknown; possibly fire. Kept as other so the fire group counts only attributed fire"
+"Water","other","Water-related change"

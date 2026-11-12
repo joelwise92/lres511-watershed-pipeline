@@ -1,0 +1,36 @@
+Point precipitation frequency estimates (millimeters/hour)
+NOAA Atlas 14 Volume 12 Version 2
+Data type: Precipitation intensity
+Time series type: Partial duration
+Project area: Interior Northwest
+Location name (ESRI Maps): None
+Station Name: None
+Latitude: 46.94293 Degree
+Longitude: -110.94127 Degree
+Elevation (USGS): None None
+
+
+PRECIPITATION FREQUENCY ESTIMATES
+by duration for ARI (years):, 1,2,5,10,25,50,100,200,500,1000
+5-min:, 53,73,105,132,169,196,224,251,288,315
+10-min:, 37,51,73,92,117,136,155,174,200,218
+15-min:, 29,39,57,71,91,105,120,135,155,169
+30-min:, 17,24,35,43,55,64,73,82,94,103
+60-min:, 10,14,21,26,33,38,44,49,56,61
+2-hr:, 7,9,12,15,19,22,25,28,32,36
+3-hr:, 6,7,9,11,14,16,18,20,23,26
+6-hr:, 4,5,6,7,8,9,10,12,14,15
+12-hr:, 3,3,4,4,5,6,7,8,9,10
+24-hr:, 2,2,2,3,3,4,4,5,6,6
+2-day:, 1,1,2,2,2,2,3,3,3,4
+3-day:, 1,1,1,1,2,2,2,2,3,3
+4-day:, 1,1,1,1,1,1,2,2,2,2
+7-day:, 0,1,1,1,1,1,1,1,1,2
+10-day:, 0,0,1,1,1,1,1,1,1,1
+20-day:, 0,0,0,0,0,1,1,1,1,1
+30-day:, 0,0,0,0,0,0,0,1,1,1
+45-day:, 0,0,0,0,0,0,0,0,0,0
+60-day:, 0,0,0,0,0,0,0,0,0,0
+
+Date/time (GMT):  Wed Oct 14 19:38:53 2026
+pyRunTime:  0.0075724124908447266
