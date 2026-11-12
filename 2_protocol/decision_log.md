@@ -248,9 +248,11 @@ Each entry records a processing decision, the alternatives considered, and the r
 - **Reason:** `renv` keeps a separate library for each R version. The lockfile's older versions had no ready-made Windows builds for R 4.6 and failed to compile without Rtools. The README states the project's R version and notes that on Windows, Rtools lets `renv` restore exact versions across R updates.
 - **Affects:** `renv.lock`; README.
 
-### 39. Open questions for the instructor check-in
-- **Stream source:** keep querying the NHDPlus HR map service, which USGS describes as a browsing service, or download NHDPlus HR files by region (more reliable, but much larger downloads).
-- **Stream elevations:** take them from the DEM instead of NHDPlus attributes, which would avoid placeholder values like those found in Nebraska.
+### 39. Stream source and stream elevations
+- **Decision:** Keep querying the NHDPlus HR map service (in tiles with paced retries, entry 36), and keep the NHDPlus elevation attributes for streams.
+- **Alternatives considered:** Downloading NHDPlus HR files by region, which is more reliable but means much larger downloads; taking stream elevations from the DEM, which would avoid placeholder values like those found in Nebraska.
+- **Reason:** My judgment, without instructor input: the map service works for the pilot and returns only the needed area, and the pilot's stream elevations pass the stream elevation check. Revisit the service if outages continue, and the elevations before using the pipeline in flat terrain.
+- **Affects:** `get_streams.R`; `crosswalk.csv`; stream attributes.
 
 ### 40. Forest structure source
 - **Decision:** LANDFIRE 2024 canopy cover (`LF2024_CC`) and canopy height (`LF2024_CH`) from the LANDFIRE Product Service, requested in EPSG:5070 for the watershed plus a 1 km buffer. Canopy height is converted from decimeters to meters. Both are resampled from 30 m to the 10 m grid with nearest neighbor.
@@ -261,7 +263,7 @@ Each entry records a processing decision, the alternatives considered, and the r
 ### 41. Disturbance history source and summary layers
 - **Decision:** LANDFIRE Annual Disturbance (final products), 1999 to 2025, requested in batches for the watershed plus a 1 km buffer. Each year's codes are translated with that year's own LANDFIRE attribute table, because code meanings change between years. Product names come from `2_protocol/landfire_dist_products.csv`, verified against LANDFIRE's product table. The annual layers are summarized per cell into five layers: last harvest year, last fire year, last insect year, number of disturbed years, and severity of the most recent disturbance.
 - **Alternatives considered:** Assembling disturbance directly from agency sources (MTBS burn severity, USFS Aerial Detection Survey, FACTS activities).
-- **Reason:** DRAFT: one consistent annual product across all years and agencies, already gridded at 30 m, instead of four sources with different formats, vocabularies, and positional accuracy. Note: LANDFIRE may under-record insect mortality, which develops gradually over several years.
+- **Reason:** LANDFIRE was more consistent to retrieve: one programmatic service (`rlandfire`) delivers every year in the same format on the same 30 m grid, instead of three agency sources with different access methods, formats, and vocabularies. Note: LANDFIRE may under-record insect mortality, which develops gradually over several years.
 - **Affects:** `get_disturbance.R`; `harmonize_disturbance.R`; `landfire_dist_products.csv`.
 
 ### 42. Disturbance type groups
@@ -310,3 +312,21 @@ Each entry records a processing decision, the alternatives considered, and the r
 - **Alternatives considered:** Leaving the original check, which failed with "missing value where TRUE/FALSE needed."
 - **Reason:** NRCS takes Soil Data Access down for daily maintenance from 12:30 to 12:45 AM Central. A run during that window failed with a cryptic error that pointed at the code, not the service. Like the NHDPlus outages in entry 36, the error should name the service so the fix (wait and rerun) is obvious.
 - **Affects:** `get_soils.R`.
+
+### 49. Repository contents and hosting
+- **Decision:** Host the repository on GitHub. Commit code, protocol files, documentation, the products in `4_product/`, the retrieval log, and the source metadata archive. Do not commit raw data in `1_input/` or anything in `3_incremental/`. Code is under the MIT License (`LICENSE`); data products are under CC BY 4.0.
+- **Alternatives considered:** Leaving all of `1_input/` out of git, as the project plan first described.
+- **Reason:** The pipeline downloads raw data again, so committing it would only add large files. The retrieval log and source metadata archive are small, are part of the planned metadata products, and can't be recreated: a later run gets new retrieval dates and possibly new provider versions.
+- **Affects:** `.gitignore`; `LICENSE`; README.
+
+### 50. Road source
+- **Decision:** USFS National Forest System roads from the Forest Service Enterprise Data Warehouse map service (`EDW_RoadBasic_01`, layer 0), queried for the watershed's bounding box in pages of 2,000 and kept where segments touch the watershed. Saved unchanged in NAD83 geographic coordinates, then reprojected and clipped like streams. Kept attributes: road number, name, GIS length (converted from miles to km), jurisdiction, route status, operational and objective maintenance levels, functional class, surface type, and vehicles the road is open to.
+- **Alternatives considered:** TIGER/Line roads; OpenStreetMap (the two other sources named in the project plan).
+- **Reason:** DRAFT: confirm. Forest roads are the roads most relevant to sediment delivery on national forest land, and the USFS layer carries their maintenance level and surface type, which TIGER and OpenStreetMap lack or record inconsistently. The limitation is coverage: county, state, and private roads are not included, and a watershed outside national forest land gets an empty roads layer. EDW updates daily, so the retrieval date is the effective version.
+- **Affects:** `get_roads.R`; `harmonize_grid.R`; `crosswalk.csv`; `_targets.R`; `metadata.R`; `data_summary.qmd`.
+
+### 51. USFS TreeMap
+- **Decision:** TreeMap, listed in the project plan for forest structure, was not attempted. LANDFIRE canopy cover and height (entry 40) provide forest structure for this project.
+- **Alternatives considered:** Adding TreeMap alongside LANDFIRE.
+- **Reason:** DRAFT: add whether TreeMap is still planned for the thesis.
+- **Affects:** Project scope.

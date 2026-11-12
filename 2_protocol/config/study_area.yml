@@ -2,7 +2,7 @@
 
 study_area:
   name: "pilot"            # short label used in file names
-  huc12: "031601130302"    # replace with the pilot watershed's 12-digit HUC12 ID
+  huc12: "100301030801"    # replace with the pilot watershed's 12-digit HUC12 ID
 
 crs: 5070                  # EPSG code for all outputs (draft; see decision log)
 resolution_m: 10           # target grid cell size in meters (draft; see decision log)

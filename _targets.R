@@ -59,6 +59,14 @@ list(
                                    dist_products_file, config),
              format = "file"),
   
+  # Stage 3: USFS National Forest System roads
+  tar_target(roads_file, get_roads(watershed_file), format = "file"),
+  tar_target(roads_clipped, harmonize_roads(roads_file, watershed_file, config),
+             format = "file"),
+  tar_target(roads_final,
+             harmonize_attributes(roads_clipped, crosswalk_file, "roads"),
+             format = "file"),
+  
   # Metadata
   tar_target(
     layer_catalog,
@@ -66,11 +74,11 @@ list(
       raw        = list(watershed_boundary = watershed_file, dem = dem_file,
                         streams = streams_file, soils = soils_files,
                         precip = precip_files, forest = forest_files,
-                        disturbance = dist_files),
+                        disturbance = dist_files, roads = roads_file),
       harmonized = list(watershed_boundary = watershed_final, dem = dem_harmonized,
                         streams = streams_final, soils = soils_harmonized[1:3],
                         precip = precip_harmonized, forest = forest_harmonized,
-                        disturbance = dist_harmonized)
+                        disturbance = dist_harmonized, roads = roads_final)
     ),
     format = "file"
   ),
@@ -89,7 +97,8 @@ list(
            dist_last_fire_year    = dist_harmonized[2],
            dist_last_insect_year  = dist_harmonized[3],
            dist_count             = dist_harmonized[4],
-           dist_last_severity     = dist_harmonized[5])
+           dist_last_severity     = dist_harmonized[5],
+           roads                  = roads_final)
     ),
     format = "file"
   ),
@@ -113,7 +122,8 @@ list(
                    dist_last_fire_year    = dist_harmonized[2],
                    dist_last_insect_year  = dist_harmonized[3],
                    dist_count             = dist_harmonized[4],
-                   dist_last_severity     = dist_harmonized[5]),
+                   dist_last_severity     = dist_harmonized[5],
+                   roads                  = roads_final),
       config = config,
       changelog_file = changelog_file
     ),

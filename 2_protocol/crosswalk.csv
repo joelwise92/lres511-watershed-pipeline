@@ -115,3 +115,30 @@ dist_last_fire_year,LANDFIRE annual disturbance codes,TRUE,dist_last_fire_year,,
 dist_last_insect_year,LANDFIRE annual disturbance codes,TRUE,dist_last_insect_year,,year,,,Most recent year with insects or disease (LANDFIRE Annual Disturbance)
 dist_count,LANDFIRE annual disturbance codes,TRUE,dist_count,,,,,Number of years with any disturbance in the requested year range
 dist_last_severity,LANDFIRE annual disturbance codes,TRUE,dist_last_severity,,,,,"Severity class of the most recent disturbance: 0 no severity class, 1 low, 2 medium or moderate, 3 high (LANDFIRE Annual Disturbance SEVERITY)"
+roads,rte_cn,FALSE,,,,,,
+roads,id,TRUE,road_id,,,,,Forest Service road number
+roads,name,TRUE,road_name,,,,,Road name (NA where unnamed)
+roads,bmp,FALSE,,,,,,
+roads,emp,FALSE,,,,,,
+roads,seg_length,FALSE,,,,,,
+roads,gis_miles,TRUE,road_length_km,miles,km,1.609344,,"GIS length of the whole road segment, including any part outside the watershed"
+roads,symbol_code,FALSE,,,,,,
+roads,symbol_name,FALSE,,,,,,
+roads,jurisdiction,TRUE,jurisdiction,,,,,"Agency with jurisdiction over the road, as recorded by USFS"
+roads,system,FALSE,,,,,,
+roads,route_status,TRUE,route_status,,,,,Route status as recorded by USFS
+roads,oper_maint_level,TRUE,maint_level_operational,,,,,"Operational maintenance level, USFS code and label (1 basic custodial care to 5 high degree of user comfort)"
+roads,objective_maint_level,TRUE,maint_level_objective,,,,,"Objective (planned) maintenance level, USFS code and label"
+roads,functional_class,TRUE,functional_class,,,,,"Functional class as recorded by USFS (arterial, collector, or local)"
+roads,surface_type,TRUE,surface_type,,,,,"Road surface type as recorded by USFS (e.g. native material, aggregate, paved)"
+roads,lanes,FALSE,,,,,,
+roads,primary_maintainer,FALSE,,,,,,
+roads,county,FALSE,,,,,,
+roads,congressional_district,FALSE,,,,,,
+roads,admin_org,FALSE,,,,,,
+roads,service_life,FALSE,,,,,,
+roads,level_of_service,FALSE,,,,,,
+roads,pfsr_classification,FALSE,,,,,,
+roads,managing_org,FALSE,,,,,,
+roads,loc_error,FALSE,,,,,,
+roads,openforuseto,TRUE,open_for_use_to,,,,,"Vehicle classes the road is open to, as recorded by USFS"

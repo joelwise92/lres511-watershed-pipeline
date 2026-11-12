@@ -88,3 +88,19 @@ harmonize_streams <- function(streams_file, watershed_file, config) {
   sf::st_write(streams_clip, out_file, delete_dsn = TRUE, quiet = TRUE)
   out_file
 }
+# Roads: reproject to the output CRS and clip to the watershed, the same way
+# as streams. Attributes such as GIS length describe the whole road segment,
+# not the clipped piece.
+harmonize_roads <- function(roads_file, watershed_file, config) {
+  ws    <- read_watershed(watershed_file, config)
+  huc   <- ws$huc12[1]
+  roads <- sf::st_transform(sf::st_read(roads_file, quiet = TRUE), config$crs)
+  
+  roads_clip <- suppressWarnings(sf::st_intersection(roads, sf::st_geometry(ws)))
+  
+  out_dir <- "3_incremental/clipped"
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  out_file <- file.path(out_dir, paste0("roads_", huc, ".gpkg"))
+  sf::st_write(roads_clip, out_file, delete_dsn = TRUE, quiet = TRUE)
+  out_file
+}

@@ -4,7 +4,7 @@
 #    or set it to "random" to test a random watershed in the lower 48 states
 # 2. Click Source (top right of the editor), or run source("run.R")
 
-huc12 <- "random"   # Upper Tenderfoot Creek, MT is the pilot (100301030801)
+huc12 <- "100301030801"   # Upper Tenderfoot Creek, MT is the pilot (100301030801)
 
 # Packages first, so everything below can run on a new computer
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")

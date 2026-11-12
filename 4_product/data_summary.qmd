@@ -28,6 +28,7 @@ precip_raw <- tar_read(precip_files)   # raw zips; the PFDS point table is saved
 forest     <- terra::rast(tar_read(forest_harmonized))
 dist       <- terra::rast(tar_read(dist_harmonized)[1:5])   # 6th file is the code lookup
 dist_codes <- read.csv(tar_read(dist_harmonized)[6])
+roads      <- sf::st_read(tar_read(roads_final), quiet = TRUE)
 catalog    <- read.csv(tar_read(layer_catalog))
 dictionary <- read.csv(tar_read(data_dictionary))
 
@@ -147,6 +148,34 @@ terra::plot(sev, main = "Severity of most recent disturbance")
 terra::lines(terra::vect(ws), col = "grey40")
 ```
 
+## Roads
+
+National Forest System roads from the USFS road database (EDW), clipped to the watershed. County, state, and private roads are not included. Road length attributes describe whole road segments, not the clipped pieces.
+
+```{r map-roads, fig.height = 7, fig.cap = "National Forest System roads by operational maintenance level."}
+if (nrow(roads) == 0) {
+  plot(sf::st_geometry(ws), border = "grey40",
+       main = "National Forest System roads (none in this watershed)")
+} else {
+  ml   <- ifelse(is.na(roads$maint_level_operational), "Not recorded",
+                 roads$maint_level_operational)
+  lev  <- sort(unique(ml))
+  cols <- hcl.colors(length(lev), "Dark 3")
+  # USFS labels arrive in capitals ("2 - HIGH CLEARANCE VEHICLES");
+  # show them as "2: High clearance vehicles"
+  lab  <- sub("^(\\w+) - ", "\\1: ", lev)
+  lab  <- sub(": (.)(.*)$", ": \\U\\1\\L\\2", lab, perl = TRUE)
+  # Extend the plot below the watershed so the legend sits in empty space
+  bb <- sf::st_bbox(ws)
+  h  <- bb[["ymax"]] - bb[["ymin"]]
+  plot(sf::st_geometry(ws), border = "grey40", main = "National Forest System roads",
+       ylim = c(bb[["ymin"]] - 0.3 * h, bb[["ymax"]]))
+  plot(sf::st_geometry(roads), add = TRUE, col = cols[match(ml, lev)], lwd = 2)
+  legend("bottom", legend = lab, col = cols, lwd = 3, bty = "n", cex = 0.85,
+         title = "Operational maintenance level")
+}
+```
+
 ## Quality checks
 
 ```{r qa}
@@ -176,7 +205,8 @@ crs_codes <- c(sf::st_crs(ws)$epsg, sf::st_crs(streams)$epsg,
                as.numeric(terra::crs(soils, describe = TRUE)$code),
                as.numeric(terra::crs(precip, describe = TRUE)$code),
                as.numeric(terra::crs(forest, describe = TRUE)$code),
-               as.numeric(terra::crs(dist, describe = TRUE)$code))
+               as.numeric(terra::crs(dist, describe = TRUE)$code),
+               sf::st_crs(roads)$epsg)
 
 # Disturbance: years within the requested range, counts and severity plausible
 yr_cfg   <- c(config$disturbance$start_year, config$disturbance$end_year)
@@ -188,6 +218,10 @@ n_years  <- diff(yr_cfg) + 1
 sev_vals <- sort(unique(stats::na.omit(terra::values(dist[["dist_last_severity"]]))))
 # Disturbance types not in dist_type_groups.csv (counted as "other")
 unmapped <- sort(unique(dist_codes$dist_type[!dist_codes$in_groups_file]))
+
+# Roads: inside the watershed; total length and density within it
+roads_in <- lengths(sf::st_within(roads, sf::st_buffer(ws, 1))) > 0
+road_km  <- sum(as.numeric(sf::st_length(roads))) / 1000
 
 # Forest: classed values survive resampling only if no blending happened
 n_classes <- vapply(names(forest), function(nm)
@@ -236,7 +270,9 @@ checks <- data.frame(
     "Disturbance years within the requested range",
     "Disturbance count no greater than the number of years requested",
     "Disturbance severity values are 0, 1, 2, or 3",
-    "All LANDFIRE disturbance types are in dist_type_groups.csv"
+    "All LANDFIRE disturbance types are in dist_type_groups.csv",
+    "All roads fall within the watershed",
+    "National Forest System road length and density (information)"
   ),
   result = c(
     paste(unique(crs_codes), collapse = ", "),
@@ -263,7 +299,9 @@ checks <- data.frame(
     paste0("max ", cnt_max, " of ", n_years, " years"),
     paste(sev_vals, collapse = ", "),
     if (length(unmapped) == 0) "all mapped" else
-      paste("counted as other:", paste(unmapped, collapse = ", "))
+      paste("counted as other:", paste(unmapped, collapse = ", ")),
+    paste(sum(roads_in), "of", nrow(roads)),
+    paste0(round(road_km, 1), " km; ", round(road_km / ws$area_km2, 2), " km per km²")
   ),
   pass = c(
     all(crs_codes == config$crs),
@@ -287,7 +325,9 @@ checks <- data.frame(
     all(is.finite(yr_rng)) && yr_rng[1] >= yr_cfg[1] && yr_rng[2] <= yr_cfg[2],
     cnt_max <= n_years,
     all(sev_vals %in% 0:3),
-    length(unmapped) == 0
+    length(unmapped) == 0,
+    all(roads_in),
+    NA                                                      # information only
   )
 )
 checks$pass <- ifelse(is.na(checks$pass), "INFO", ifelse(checks$pass, "PASS", "CHECK"))

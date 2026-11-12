@@ -62,7 +62,11 @@ processing_notes <- c(
                       "group; dist_count is the number of years with any disturbance. Every source",
                       "label with its assigned group and rank is listed in the watershed's",
                       "4_product/data/disturbance_codes_[HUC12].csv. Resampled to common grid with",
-                      "nearest neighbor; masked to watershed; NoData = -9999.")
+                      "nearest neighbor; masked to watershed; NoData = -9999."),
+  roads   = paste("National Forest System roads only (no county, state, or private roads);",
+                  "reprojected to output CRS; clipped to watershed; attributes renamed and",
+                  "converted per crosswalk (GIS miles to km). road_length_km describes the",
+                  "whole road segment, not the clipped piece.")
 )
 
 # Scripts (and functions) that retrieve and process each layer. Update this
@@ -74,7 +78,8 @@ layer_scripts <- c(
   soils       = "get_soils.R; harmonize_soils.R",
   precip      = "get_precip.R; harmonize_precip.R",
   forest      = "get_forest.R; harmonize_forest.R",
-  disturbance = "get_disturbance.R; harmonize_disturbance.R"
+  disturbance = "get_disturbance.R; harmonize_disturbance.R",
+  roads       = "get_roads.R; harmonize_grid.R (harmonize_roads); harmonize_attributes.R"
 )
 
 # Build the layer catalog: one row per layer, combining the retrieval log

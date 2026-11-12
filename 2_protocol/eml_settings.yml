@@ -4,11 +4,11 @@
 title: "Harmonized public geospatial data for steep-terrain watershed research"
 
 abstract: >
-  Terrain, stream network, soil erodibility, rainfall intensity, forest canopy, and
-  disturbance history layers for one watershed, assembled from public sources (USGS
-  3DEP and NHDPlus HR, the Watershed Boundary Dataset, NRCS SSURGO, NOAA Atlas 14,
-  and LANDFIRE canopy cover, canopy height, and Annual Disturbance) by a
-  reproducible R pipeline.
+  Terrain, stream network, soil erodibility, rainfall intensity, forest canopy,
+  disturbance history, and road layers for one watershed, assembled from public
+  sources (USGS 3DEP and NHDPlus HR, the Watershed Boundary Dataset, NRCS SSURGO,
+  NOAA Atlas 14, LANDFIRE canopy cover, canopy height, and Annual Disturbance, and
+  USFS National Forest System roads) by a reproducible R pipeline.
   All layers share one coordinate reference system and grid, attributes are harmonized
   through a documented crosswalk, and every processing decision is recorded in the
   project's decision log.
@@ -28,13 +28,14 @@ keywords:
   - forest canopy
   - disturbance history
   - wildfire
+  - forest roads
   - data harmonization
   - reproducible research
 
 intellectual_rights: >
   This dataset is released under the Creative Commons Attribution 4.0 International
   License (CC BY 4.0). Source data are public domain U.S. government products from USGS,
-  NRCS, NOAA, and the LANDFIRE program.
+  NRCS, NOAA, the LANDFIRE program, and the USDA Forest Service.
 
 methods_overview: >
   Each layer is downloaded by script, saved unchanged with its source metadata, and
@@ -45,4 +46,3 @@ methods_overview: >
   checksums, and revisions are logged in 2_protocol/changelog.csv. Automated quality
   checks are reported in the rendered summary report. The steps below describe each
   layer.
-  
