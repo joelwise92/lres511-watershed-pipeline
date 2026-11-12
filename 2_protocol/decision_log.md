@@ -322,11 +322,17 @@ Each entry records a processing decision, the alternatives considered, and the r
 ### 50. Road source
 - **Decision:** USFS National Forest System roads from the Forest Service Enterprise Data Warehouse map service (`EDW_RoadBasic_01`, layer 0), queried for the watershed's bounding box in pages of 2,000 and kept where segments touch the watershed. Saved unchanged in NAD83 geographic coordinates, then reprojected and clipped like streams. Kept attributes: road number, name, GIS length (converted from miles to km), jurisdiction, route status, operational and objective maintenance levels, functional class, surface type, and vehicles the road is open to.
 - **Alternatives considered:** TIGER/Line roads; OpenStreetMap (the two other sources named in the project plan).
-- **Reason:** DRAFT: confirm. Forest roads are the roads most relevant to sediment delivery on national forest land, and the USFS layer carries their maintenance level and surface type, which TIGER and OpenStreetMap lack or record inconsistently. The limitation is coverage: county, state, and private roads are not included, and a watershed outside national forest land gets an empty roads layer. EDW updates daily, so the retrieval date is the effective version.
+- **Reason:** Forest roads are the roads most relevant to sediment delivery on national forest land, and the USFS layer carries their maintenance level and surface type, which TIGER and OpenStreetMap lack or record inconsistently. The limitation is coverage: county, state, and private roads are not included, and a watershed outside national forest land gets an empty roads layer. EDW updates daily, so the retrieval date is the effective version.
 - **Affects:** `get_roads.R`; `harmonize_grid.R`; `crosswalk.csv`; `_targets.R`; `metadata.R`; `data_summary.qmd`.
 
 ### 51. USFS TreeMap
 - **Decision:** TreeMap, listed in the project plan for forest structure, was not attempted. LANDFIRE canopy cover and height (entry 40) provide forest structure for this project.
 - **Alternatives considered:** Adding TreeMap alongside LANDFIRE.
-- **Reason:** DRAFT: add whether TreeMap is still planned for the thesis.
+- **Reason:** TreeMap would add tree-level detail beyond canopy cover and height; whether to add it for the thesis is undecided.
 - **Affects:** Project scope.
+
+### 52. Reuse the watershed boundary download
+- **Decision:** `get_watershed()` reuses an existing boundary file for the same HUC12, as `get_streams()` does, and reports a failed download as a likely service outage.
+- **Alternatives considered:** Downloading the boundary on every run.
+- **Reason:** On November 11, 2026, the USGS boundary service timed out (504 errors) and the pipeline stopped with "No HUC12 boundary found," which wrongly suggested a bad HUC12 code. Every later step depends on the boundary, so an outage blocked the whole pipeline even though the pilot's boundary was already saved. WBD boundaries change rarely, and the original download stays in the retrieval log.
+- **Affects:** `get_watershed.R`; processing guide.

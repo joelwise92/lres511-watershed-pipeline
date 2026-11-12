@@ -40,7 +40,7 @@ Useful Console commands:
 | `targets::tar_meta(fields = warnings, complete_only = TRUE)` | Warnings from steps that finished |
 | `targets::tar_invalidate(name)` | Force one step (and everything after it) to rerun |
 
-**Switching watersheds** rebuilds every step, because the config changed. Raw stream, road, precipitation, forest, and disturbance downloads are reused if that watershed's files already exist in `1_input/`; the watershed boundary, DEM, and soils are downloaded again. Reused layers keep their original retrieval log entry.
+**Switching watersheds** rebuilds every step, because the config changed. Raw watershed boundary, stream, road, precipitation, forest, and disturbance downloads are reused if that watershed's files already exist in `1_input/`; the DEM and soils are downloaded again. Reused layers keep their original retrieval log entry.
 
 ## 3. Configuration
 
@@ -55,7 +55,10 @@ Useful Console commands:
 | `precip: ari_years` | Storm return period in years (2) |
 | `precip: durations` | Storm durations, e.g. `["30m", "60m", "06h"]` |
 | `disturbance: start_year`, `end_year` | Years of LANDFIRE Annual Disturbance to summarize (1999 to 2025) |
-| [Confirm names: LANDFIRE forest products and request email] | [Describe the remaining LANDFIRE settings as they appear in the file] |
+| `forest: products` | LANDFIRE forest products to download (`LF2024_CC` canopy cover, `LF2024_CH` canopy height) |
+| `forest: email` | Email address LANDFIRE requires with each request; used for both forest and disturbance downloads |
+| `disturbance: tables_url` | Download address of LANDFIRE's disturbance attribute tables for all years |
+| `study_area: name`, `dates: start`, `dates: end` | Not currently used by the pipeline (kept from the original template); the disturbance layers use `disturbance: start_year` and `end_year` |
 
 Changing `crs` or `resolution_m` regrids every layer. Changing the storm settings also requires matching crosswalk rows (section 5). Changing the disturbance years requires a product name for each year in `landfire_dist_products.csv`.
 
@@ -169,6 +172,7 @@ Checks cover:
 | `NHDPlus HR did not return flowlines for ... tiles` or `Request failed [504]` | The service is timing out (it reports timeouts the same way as an area with no streams). Test with the pilot: if `nhdplusTools::get_nhdphr()` fails there too, the service is struggling; wait and rerun. |
 | `NRCS Soil Data Access did not return ...` | Soil service outage. NRCS runs daily maintenance from about 12:30 to 12:45 AM Central. Wait and rerun. To check the service: `soilDB::SDA_query("SELECT TOP 1 areasymbol FROM legend")`. |
 | `The USFS road map service is not responding` or `did not return roads` | Forest Service service outage. Wait and rerun. Check `https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer` in a browser. |
+| `No HUC12 boundary returned for ...` | Usually a USGS Watershed Boundary Dataset service outage (the log shows `Request failed [504]`). Wait and rerun. If the HUC12 code is new, check it with `find_huc12()`. |
 | `NOAA Atlas 14 has no coverage` | The watershed is in Oregon or Washington. Not supported until NOAA Atlas 15 is published. |
 | `Atlas 14 Volume N is not in atlas14_volumes.csv` | Add that volume's folder (section 5). |
 | `No retrieval log entry for ...` | A raw file exists without a log entry. Delete the file and rerun to download and log it again. |
@@ -182,4 +186,4 @@ Checks cover:
 | A step reruns every time with no changes | A step is overwriting another step's output file. Check `targets::tar_read()` paths for two steps writing the same file. |
 | Pasted commands are ignored, or `Unrecognized response` | R was waiting for an answer to a `[Y/n]` prompt or menu. Answer it first, then paste the next command. |
 | `Permission denied` or "file in use" errors | A sync service (such as OneDrive) is locking files. Pause syncing or move the project to a non-synced folder. |
-| A downloaded layer needs refreshing (e.g. a provider published an update) | Delete its raw file in `1_input/` and rerun. Stream, road, precipitation, forest, and disturbance files are reused until deleted. |
+| A downloaded layer needs refreshing (e.g. a provider published an update) | Delete its raw file in `1_input/` and rerun. Watershed boundary, stream, road, precipitation, forest, and disturbance files are reused until deleted. |

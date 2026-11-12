@@ -77,7 +77,7 @@
     <methods>
       <methodStep>
         <description>
-          <para>Each layer is downloaded by script, saved unchanged with its source metadata, and logged with its source, version, and retrieval date. Layers are then reprojected to a common coordinate reference system, resampled to a common grid, masked to the watershed, and harmonized to consistent attribute names, units, and NoData values using a documented crosswalk. Raw downloads (where logged) and final files carry MD5 checksums, and revisions are logged in 2_protocol/changelog.csv. Automated quality checks are reported in the rendered summary report. The steps below describe each layer. Pipeline code version: not under git version control.</para>
+          <para>Each layer is downloaded by script, saved unchanged with its source metadata, and logged with its source, version, and retrieval date. Layers are then reprojected to a common coordinate reference system, resampled to a common grid, masked to the watershed, and harmonized to consistent attribute names, units, and NoData values using a documented crosswalk. Raw downloads (where logged) and final files carry MD5 checksums, and revisions are logged in 2_protocol/changelog.csv. Automated quality checks are reported in the rendered summary report. The steps below describe each layer. Pipeline code version: git commit 0f5743b (with uncommitted changes).</para>
         </description>
       </methodStep>
       <methodStep>
@@ -102,7 +102,7 @@
       </methodStep>
       <methodStep>
         <description>
-          <para>precip: NOAA Atlas 14 precipitation frequency grids, partial duration series (PFDS) (https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr30ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr60ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr06ha.zip). Version: NOAA Atlas 14 Volume 12 Version 2 (folder inw); 2-year ARI; durations 30m, 60m, 06h. Retrieved: 2026-10-31 18:43:52 MDT. Raw file MD5: 69e138657027f587216d5868fb23c01c; ebf959c680e9a8cda74225a588d32ad6; a8670467790dc0aa6504be4b5c225754; 210658bbb7ccf661871b87bf5f68ab6f. Processing: Grids read from original zips; NAD83 geographic assigned where the grid has no CRS; cropped to watershed + 2 km; depth (0.001 in) converted to intensity (mm/hr) using crosswalk factors; resampled (bilinear) from ~800 m to common grid; masked to watershed; NoData = -9999. Scripts: get_precip.R; harmonize_precip.R.</para>
+          <para>precip: NOAA Atlas 14 precipitation frequency grids, partial duration series (PFDS) (https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr30ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr60ma.zip; https://hdsc.nws.noaa.gov/pub/hdsc/data/inw/inw2yr06ha.zip). Version: NOAA Atlas 14 Volume 12 Version 2 (folder inw); 2-year ARI; durations 30m, 60m, 06h. Retrieved: 2026-11-11 21:44:33 MST. Raw file MD5: 69e138657027f587216d5868fb23c01c; ebf959c680e9a8cda74225a588d32ad6; a8670467790dc0aa6504be4b5c225754; d9ab2dfc55982189258fee595f74b2a2. Processing: Grids read from original zips; NAD83 geographic assigned where the grid has no CRS; cropped to watershed + 2 km; depth (0.001 in) converted to intensity (mm/hr) using crosswalk factors; resampled (bilinear) from ~800 m to common grid; masked to watershed; NoData = -9999. Scripts: get_precip.R; harmonize_precip.R.</para>
         </description>
       </methodStep>
       <methodStep>

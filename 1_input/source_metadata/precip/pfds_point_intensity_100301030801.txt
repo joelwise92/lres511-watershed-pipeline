@@ -32,5 +32,5 @@ by duration for ARI (years):, 1,2,5,10,25,50,100,200,500,1000
 45-day:, 0,0,0,0,0,0,0,0,0,0
 60-day:, 0,0,0,0,0,0,0,0,0,0
 
-Date/time (GMT):  Wed Oct 14 19:38:53 2026
-pyRunTime:  0.0075724124908447266
+Date/time (GMT):  Thu Nov 12 04:44:28 2026
+pyRunTime:  0.007346153259277344

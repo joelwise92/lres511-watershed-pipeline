@@ -58,14 +58,31 @@ log_retrieval <- function(layer, source, url, version, file,
 # files have uncommitted changes. Recorded in the layer catalog and EML so
 # each product can be traced to the exact code that made it.
 code_version <- function() {
+  git_exe <- find_git()
+  if (is.na(git_exe)) return("not under git version control (git not found)")
   git <- function(args) {
-    tryCatch(suppressWarnings(system2("git", args, stdout = TRUE, stderr = FALSE)),
+    tryCatch(suppressWarnings(system2(git_exe, args, stdout = TRUE, stderr = FALSE)),
              error = function(e) character(0))
   }
   commit <- git(c("rev-parse", "--short", "HEAD"))
   if (length(commit) == 0 || !is.null(attr(commit, "status"))) {
     return("not under git version control")
   }
-  dirty <- length(git(c("status", "--porcelain", "--untracked-files=no"))) > 0
+  # Only code and protocol files count: the pipeline's own outputs in
+  # 1_input/ and 4_product/ change on every run
+  dirty <- length(git(c("status", "--porcelain", "--untracked-files=no", "--",
+                        "2_protocol", "_targets.R", "run.R"))) > 0
   paste0("git commit ", commit[1], if (dirty) " (with uncommitted changes)" else "")
+}
+
+# Path to a git program: the one on the system PATH if there is one,
+# otherwise the copy bundled with GitHub Desktop on Windows (newest version).
+# Returns NA if neither is found.
+find_git <- function() {
+  on_path <- Sys.which("git")
+  if (nzchar(on_path)) return(unname(on_path))
+  bundled <- Sys.glob(file.path(Sys.getenv("LOCALAPPDATA"), "GitHubDesktop", "app-*",
+                                "resources", "app", "git", "cmd", "git.exe"))
+  if (length(bundled) > 0) return(utils::tail(sort(bundled), 1))
+  NA_character_
 }
