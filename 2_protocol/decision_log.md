@@ -159,7 +159,7 @@ Each entry records a processing decision, the alternatives considered, and the r
 ### 25. Storm set: series, return period, and durations
 - **Decision:** Partial duration series; 2-year return period; durations of 30 minutes, 1 hour, and 6 hours; best estimates only, without the 90% confidence bounds. Set in `study_area.yml` (`precip` block).
 - **Alternatives considered:** Annual maximum series; longer return periods (10- or 100-year); including confidence bounds.
-- **Reason:** Frequent, intense storms do most erosion over time, and the partial duration series is NOAA's recommended series for frequent events. Three layers keep this stage manageable. Other return periods, durations, or bounds can be added by editing the config and crosswalk. TO CONFIRM with my advisor.
+- **Reason:** Frequent, intense storms do most erosion over time, and the partial duration series is NOAA's recommended series for frequent events. Three layers keep this stage manageable. Other return periods, durations, or bounds can be added by editing the config and crosswalk. The storm set is my choice for this project.
 - **Affects:** `study_area.yml`; `get_precip.R`; `crosswalk.csv`.
 
 ### 26. Raw precipitation files kept as original zips
@@ -213,7 +213,7 @@ Each entry records a processing decision, the alternatives considered, and the r
 ### 34. Retrieval log after testing
 - **Decision:** After testing other watersheds, rebuild the pilot and trim the retrieval log to the newest row per layer, so the committed log describes the pilot's data only.
 - **Alternatives considered:** Keeping every download; a separate log per watershed.
-- **Reason:** Keeps the committed provenance record unambiguous. Test runs are documented in the testing log.
+- **Reason:** Keeps the committed provenance record unambiguous. Test runs are documented in the testing log. Files shared across watersheds, such as the NOAA Atlas 14 volume grids, can't be matched to a watershed by name, so download the pilot's shared files again before trimming. Done on November 11, 2026: the pilot's precipitation was downloaded again, and the log was trimmed to one row per layer.
 - **Affects:** `1_input/retrieval_log.csv`.
 
 ### 35. Automatic NOAA Atlas 14 volume lookup
@@ -256,7 +256,7 @@ Each entry records a processing decision, the alternatives considered, and the r
 
 ### 40. Forest structure source
 - **Decision:** LANDFIRE 2024 canopy cover (`LF2024_CC`) and canopy height (`LF2024_CH`) from the LANDFIRE Product Service, requested in EPSG:5070 for the watershed plus a 1 km buffer. Canopy height is converted from decimeters to meters. Both are resampled from 30 m to the 10 m grid with nearest neighbor.
-- **Alternatives considered:** Bilinear resampling; other LANDFIRE fuel or vegetation products. DRAFT: confirm the alternatives actually weighed.
+- **Alternatives considered:** Bilinear resampling.
 - **Reason:** LANDFIRE stores both products as classes (cover 0, 15, 25, ... 75%; height in class steps), so bilinear would invent values between classes. Requesting the output CRS from LANDFIRE avoids a second reprojection. The report checks that each layer still has 20 or fewer distinct values.
 - **Affects:** `get_forest.R`; `harmonize_forest.R`; `crosswalk.csv`.
 
@@ -269,7 +269,7 @@ Each entry records a processing decision, the alternatives considered, and the r
 ### 42. Disturbance type groups
 - **Decision:** Map each LANDFIRE disturbance type to harvest, fire, insect, or other in `2_protocol/dist_type_groups.csv`. Prescribed fire is grouped with wildfire. "Unknown/Possibly Fire" stays in other, so the fire group counts only attributed fire. Mastication and the mechanical types are in other. Types missing from the file are treated as other with a warning, and the report checks that every type found is listed.
 - **Alternatives considered:** A separate prescribed-fire group; grouping mechanical treatments with harvest.
-- **Reason:** Keeps the groups tied to LANDFIRE's own labels, which are recorded with each assignment in the code lookup file (entry 44). DRAFT: confirm the mechanical types against LANDFIRE's definitions, since newer years appear to use "Mechanical Add/Remove/Unknown" where older years use harvest and thinning types.
+- **Reason:** Keeps the groups tied to LANDFIRE's own labels, which are recorded with each assignment in the code lookup file (entry 44). Mechanical types checked against the LANDFIRE Events Data Dictionary (November 2026): Mechanical Add, Remove, and Unknown were split out of Other Mechanical starting in 2024, and Other Mechanical covers fuels reduction and site preparation for 1999 to 2023. Mechanical Remove is fuels treatment that removes biomass (for example yarding, piling, hazardous-fuel thinning, fuel breaks), not timber harvest, which LANDFIRE still records as Clearcut, Harvest, or Thinning. Keeping all four mechanical types in other keeps the groups consistent across the 2024 change, since the earlier Other Mechanical events cannot be split the same way. For the thesis, a separate fuel-treatment group may be worth considering, because yarding and piling disturb soil.
 - **Affects:** `dist_type_groups.csv`; `harmonize_disturbance.R`; `data_summary.qmd`.
 
 ### 43. Disturbance severity classes
@@ -297,12 +297,12 @@ Each entry records a processing decision, the alternatives considered, and the r
 
 ### 46. DEM source dates
 - **Decision:** Record the source date range and vertical datum (NAVD88) of each 3DEP tile. The tiles covering the pilot span source dates from 1952 to 2022.
-- **Alternatives considered:** None yet. DRAFT: the 1 m lidar DEM or USGS lidar project boundaries (WESM) would give dates for each area.
+- **Alternatives considered:** The 1 m lidar DEM or USGS lidar project boundaries (WESM), which would give survey dates for each area. Not pursued for this project.
 - **Reason:** The seamless DEM is a mosaic of source projects from different years, so the tile date range does not say when a given cell was surveyed. Before using the DEM as pre- or post-disturbance terrain, find which source covers the watershed.
 - **Affects:** `get_dem.R`; layer catalog.
 
 ### 47. Checksums for earlier downloads
-- **Decision:** Layers downloaded before October 21, 2026 (streams, precipitation, forest, disturbance) are marked "not recorded" for checksums rather than hashed now.
+- **Decision:** Layers downloaded before October 21, 2026 are marked "not recorded" for checksums rather than hashed now. As of November 11, 2026, that applies to streams, forest, and disturbance; precipitation was downloaded again with a checksum (entry 34).
 - **Alternatives considered:** Hashing the existing files; re-downloading every layer.
 - **Reason:** Hashing a file now would record a check that never happened at download time. Re-downloading would add checksums but could also bring in newer provider versions. These layers get checksums the next time they are downloaded.
 - **Affects:** `1_input/retrieval_log.csv`; layer catalog.
